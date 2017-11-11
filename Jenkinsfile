@@ -31,7 +31,7 @@ pipeline {
             def pom = readMavenPom file: 'usef-build/pom.xml'
             env.devVersion = pom.version
             env.version = pom.version.replace("-SNAPSHOT", ".${currentBuild.number}")
-            sh 'mvn -f usef-build/pom.xml -DreleaseVersion=${version} -DdevelopmentVersion=${devVersion} -DpushChanges=false -DlocalCheckout=true release:prepare release:perform -B'
+            sh 'mvn -f usef-build/pom.xml -DreleaseVersion=${version} -DdevelopmentVersion=${devVersion} -DpushChanges=true -DlocalCheckout=true release:prepare release:perform -B'
           }
         }
       }
