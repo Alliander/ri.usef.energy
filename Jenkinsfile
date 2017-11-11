@@ -30,8 +30,8 @@ pipeline {
           script {
             def pom = readMavenPom file: 'usef-build/pom.xml'
             def version = pom.version.replace("-SNAPSHOT", ".${currentBuild.number}")
-            echo 'version is ${version}'
-            echo 'pom.version is ${pom.version}'
+            echo "version is ${version}"
+            echo "pom.version is ${pom.version}"
             sh 'cd usef-build'
             sh 'mvn -DreleaseVersion=${version} -DdevelopmentVersion=${pom.version} -DpushChanges=false -DlocalCheckout=true -DpreparationGoals=initialize release:prepare release:perform -B'
             sh 'cd ..'
