@@ -29,8 +29,8 @@ pipeline {
 //          sh 'cd usef-build && mvn clean verify sonar:sonar deploy -Dsonar.host.url=$SONARQUBE_URL && cd ..'
           script {
             def pom = readMavenPom file: 'usef-build/pom.xml'
-            def devVersion = pom.version
-            def version = pom.version.replace("-SNAPSHOT", ".${currentBuild.number}")
+            env.devVersion = pom.version
+            env.version = pom.version.replace("-SNAPSHOT", ".${currentBuild.number}")
             sh 'mvn -f usef-build/pom.xml -DreleaseVersion=${version} -DdevelopmentVersion=${devVersion} -DpushChanges=false -DlocalCheckout=true -DpreparationGoals=initialize release:prepare release:perform -B'
           }
         }
