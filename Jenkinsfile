@@ -38,7 +38,7 @@ pipeline {
                             sh 'mvn -f usef-build/pom.xml clean deploy -DskipTests'
 //                            sh 'git checkout -b release_$version'
 //                            sh 'git commit -am "New release $version"'
-//                            sh 'git tag $version'
+                            sh 'git tag $version'
 //                            sh 'git merge '
                             //
                             //sh "git push origin $version"
