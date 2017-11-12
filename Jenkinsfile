@@ -29,13 +29,10 @@ pipeline {
 //          sh 'cd usef-build && mvn clean verify sonar:sonar deploy -Dsonar.host.url=$SONARQUBE_URL && cd ..'
                     script {
                         def pom = readMavenPom file: 'usef-build/pom.xml'
-                        echo "Remote branch is $GIT_BRANCH"
-                        echo 'git push --follow-tags "$GIT_URL" "+HEAD:${GIT_BRANCH/#origin\\//refs/heads/}"'
                         env.devVersion = pom.version
                         env.version = pom.version.replace("-SNAPSHOT", ".${currentBuild.number}")
                         sh 'mvn -f usef-build/pom.xml -DreleaseVersion=${version} -DdevelopmentVersion=${devVersion} -DpushChanges=false -DlocalCheckout=true release:prepare release:perform -B'
-
-
+                        sh "git push ${pom.artifactId}-${version}"
                     }
                 }
             }
