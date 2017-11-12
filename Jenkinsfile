@@ -4,7 +4,7 @@
 pipeline {
     agent none
     environment {
-        MAVEN_OPTS = '-Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true'
+       // MAVEN_OPTS = '-Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true'
         GITUSER = credentials('jenkins-dynamo')
     }
     options {
@@ -49,21 +49,6 @@ pipeline {
                 }
             }
         }
-
-//    stage("Quality Gate"){
-//      agent any
-//      steps {
-//        timeout(time: 1, unit: 'HOURS') { // Just in case something goes wrong, pipeline will be killed after a timeout
-//          script {
-//            def qg = waitForQualityGate() // Reuse taskId previously collected by withSonarQubeEnv
-//            if (qg.status != 'OK') {
-//              error "Pipeline aborted due to quality gate failure: ${qg.status}"
-//            }
-//          }
-//        }
-//      }
-//    }
-
     }
     post {
         failure {
