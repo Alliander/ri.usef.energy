@@ -26,13 +26,15 @@ pipeline {
             }
             steps {
                 withSonarQubeEnv('My SonarQube Server') {
-//          sh 'cd usef-build && mvn clean verify sonar:sonar deploy -Dsonar.host.url=$SONARQUBE_URL && cd ..'
                     script {
                         def pom = readMavenPom file: 'usef-build/pom.xml'
                         env.devVersion = pom.version
                         env.version = pom.version.replace("-SNAPSHOT", ".${currentBuild.number}")
-                        sh 'mvn -f usef-build/pom.xml -DreleaseVersion=${version} -DdevelopmentVersion=${devVersion} -DpushChanges=false -DlocalCheckout=true release:prepare release:perform -B'
-                        sh "git push ${pom.artifactId}-${version}"
+                        sh "mvn versions:set -DnewVersion=$version"
+                        sh 'mvn -f usef-build/pom.xml clean deploy'
+                        sh 'git commit -am "New release $version"'
+                        sh 'git tag $version'
+                        //sh "git push origin $version"
                     }
                 }
             }
