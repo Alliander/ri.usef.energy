@@ -31,7 +31,7 @@ pipeline {
                         env.devVersion = pom.version
                         env.version = pom.version.replace("-SNAPSHOT", ".${currentBuild.number}")
                         sh "mvn versions:set -DnewVersion=$version"
-                        sh 'mvn -f usef-build/pom.xml clean deploy'
+                        sh 'mvn -f usef-build/pom.xml clean deploy -DskipTests'
                         sh 'git commit -am "New release $version"'
                         sh 'git tag $version'
                         //sh "git push origin $version"
