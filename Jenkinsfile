@@ -19,15 +19,6 @@ pipeline {
             }
         }
 
-        stage('Prepare') {
-            steps {
-                checkout([$class                           : 'GitSCM',
-                          branches                         : [[name: "origin/${env.BRANCH_NAME}"]],
-                          doGenerateSubmoduleConfigurations: false,
-                          extensions                       : [[$class: 'LocalBranch']]])
-            }
-        }
-
         stage('Build') {
             agent any
             tools {
@@ -36,7 +27,7 @@ pipeline {
             steps {
                 withSonarQubeEnv('My SonarQube Server') {
                     script {
-                        //sh 'git checkout $BRANCHE_NAME'
+                        sh 'git checkout origin/$BRANCHE_NAME'
                         sh 'git reset --hard origin/$BRANCH_NAME'
                         if (env.BRANCH_NAME == "feature/jenkins") {
                             def pom = readMavenPom file: 'usef-build/pom.xml'
