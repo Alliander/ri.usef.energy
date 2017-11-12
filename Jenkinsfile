@@ -39,7 +39,7 @@ pipeline {
                             sh "mvn -f usef-build/pom.xml versions:set -DnewVersion=$version"
                             sh 'mvn -f usef-build/pom.xml clean deploy -DskipTests'
 
-                            sh 'git tag -a $version'
+                            sh 'git tag -a $version -m "New release"'
                             sh 'git push https://${GITUSER_USR}:${GITUSER_PSW}@github.com/Alliander/ri.usef.energy.git $version'
 
                         } else {
