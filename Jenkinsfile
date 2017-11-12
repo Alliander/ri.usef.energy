@@ -27,17 +27,19 @@ pipeline {
             steps {
                 withSonarQubeEnv('My SonarQube Server') {
                     script {
-                        sh 'git fetch'
-                        sh 'git checkout $BRANCHE_NAME origin/$BRANCHE_NAME'
-                        sh 'git reset --hard origin/$BRANCH_NAME'
                         if (env.BRANCH_NAME == "feature/jenkins") {
+                            sh 'git remote update'
+                            sh 'git fetch'
+                            sh 'git checkout --track origin/$BRANCH_NAME'
                             def pom = readMavenPom file: 'usef-build/pom.xml'
                             env.devVersion = pom.version
                             env.version = pom.version.replace("-SNAPSHOT", ".${currentBuild.number}")
                             sh "mvn -f usef-build/pom.xml versions:set -DnewVersion=$version"
                             sh 'mvn -f usef-build/pom.xml clean deploy -DskipTests'
-                            sh 'git commit -am "New release $version"'
-                            sh 'git tag $version'
+//                            sh 'git checkout -b release_$version'
+//                            sh 'git commit -am "New release $version"'
+//                            sh 'git tag $version'
+//                            sh 'git merge '
                             //
                             //sh "git push origin $version"
                         } else {
