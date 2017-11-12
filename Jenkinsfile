@@ -19,18 +19,6 @@ pipeline {
             }
         }
 
-        stage('Checkout') {
-            agent any
-            steps {
-                checkout([
-                        $class           : 'GitSCM',
-                        branches         : scm.branches,
-                        extensions       : [[$class: 'LocalBranch', localBranch: "**"]],
-                        userRemoteConfigs: scm.userRemoteConfigs
-                ])
-            }
-        }
-
         stage('Build') {
             agent any
             tools {
@@ -41,9 +29,13 @@ pipeline {
 //          sh 'cd usef-build && mvn clean verify sonar:sonar deploy -Dsonar.host.url=$SONARQUBE_URL && cd ..'
                     script {
                         def pom = readMavenPom file: 'usef-build/pom.xml'
+                        echo "Remote branch is $GIT_BRANCH"
+                        echo 'git push --follow-tags "$GIT_URL" "+HEAD:${GIT_BRANCH/#origin\\//refs/heads/}"'
                         env.devVersion = pom.version
                         env.version = pom.version.replace("-SNAPSHOT", ".${currentBuild.number}")
-                        sh 'mvn -f usef-build/pom.xml -DreleaseVersion=${version} -DdevelopmentVersion=${devVersion} -DpushChanges=true -DlocalCheckout=false release:prepare release:perform -B'
+                        sh 'mvn -f usef-build/pom.xml -DreleaseVersion=${version} -DdevelopmentVersion=${devVersion} -DpushChanges=false -DlocalCheckout=true release:prepare release:perform -B'
+
+
                     }
                 }
             }
