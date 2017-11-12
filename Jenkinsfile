@@ -27,6 +27,8 @@ pipeline {
             steps {
                 withSonarQubeEnv('My SonarQube Server') {
                     script {
+                        sh 'git checkout $BRANCHE_NAME'
+                        sh 'git reset --hard origin/$BRANCH_NAME'
                         if (env.BRANCH_NAME == "feature/jenkins") {
                             def pom = readMavenPom file: 'usef-build/pom.xml'
                             env.devVersion = pom.version
