@@ -31,17 +31,15 @@ pipeline {
                             sh 'git remote update'
                             sh 'git fetch'
                             sh 'git checkout --track origin/$BRANCH_NAME'
+
                             def pom = readMavenPom file: 'usef-build/pom.xml'
                             env.devVersion = pom.version
                             env.version = pom.version.replace("-SNAPSHOT", ".${currentBuild.number}")
                             sh "mvn -f usef-build/pom.xml versions:set -DnewVersion=$version"
                             sh 'mvn -f usef-build/pom.xml clean deploy -DskipTests'
-//                            sh 'git checkout -b release_$version'
-//                            sh 'git commit -am "New release $version"'
+
                             sh 'git tag $version'
-//                            sh 'git merge '
-                            //
-                            //sh "git push origin $version"
+                            sh "git push $version"
                         } else {
                             sh 'mvn -f usef-build/pom.xml clean deploy -DskipTests'
                         }
