@@ -27,6 +27,7 @@ pipeline {
             steps {
                 withSonarQubeEnv('My SonarQube Server') {
                     script {
+                        deleteDir()
                         sh 'git fetch'
                         sh 'git checkout $BRANCHE_NAME origin/$BRANCHE_NAME'
                         sh 'git reset --hard origin/$BRANCH_NAME'
