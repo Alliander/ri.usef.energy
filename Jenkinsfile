@@ -38,6 +38,7 @@ pipeline {
                             sh 'mvn -f usef-build/pom.xml clean deploy -DskipTests'
                             sh 'git commit -am "New release $version"'
                             sh 'git tag $version'
+                            //
                             //sh "git push origin $version"
                         } else {
                             sh 'mvn -f usef-build/pom.xml clean deploy -DskipTests'
