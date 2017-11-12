@@ -25,7 +25,7 @@ pipeline {
                 checkout([
                         $class           : 'GitSCM',
                         branches         : scm.branches,
-                        extensions       : scm.extensions + [[$class: 'CleanCheckout']],
+                        extensions       : scm.extensions + [[$class: 'CleanCheckout']] + [[$class: 'LocalBranch', localBranch: "**"]],
                         userRemoteConfigs: scm.userRemoteConfigs
                 ])
             }
