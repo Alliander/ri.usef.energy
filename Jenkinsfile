@@ -45,8 +45,8 @@ pipeline {
                 }
 
                 withCredentials([usernamePassword(credentialsId: 'jenkins-dynamo')]) {
-                    sh("git tag -a $version -m 'New release $version'")
-                    sh('git push --tags')
+                    sh 'git tag -a $version'
+                    sh 'git push --tags'
                 }
             }
         }
