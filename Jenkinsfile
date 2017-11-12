@@ -45,6 +45,11 @@ pipeline {
                         }
                     }
                 }
+
+                withCredentials([usernamePassword(credentialsId: 'Jenkins Dynamo 2FA')]) {
+                    sh("git tag -a $version -m 'New release $version'")
+                    sh('git push --tags')
+                }
             }
         }
 
