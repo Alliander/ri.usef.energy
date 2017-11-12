@@ -27,7 +27,7 @@ pipeline {
             steps {
                 withSonarQubeEnv('My SonarQube Server') {
                     script {
-                        if (env.BRANCH_NAME == "develop") {
+                        if (env.BRANCH_NAME == "feature/jenkins") {
                             def pom = readMavenPom file: 'usef-build/pom.xml'
                             env.devVersion = pom.version
                             env.version = pom.version.replace("-SNAPSHOT", ".${currentBuild.number}")
