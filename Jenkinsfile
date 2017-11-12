@@ -5,6 +5,7 @@ pipeline {
     agent none
     environment {
         MAVEN_OPTS = '-Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true'
+        GITUSER = credentials('jenkins-dynamo')
     }
     options {
         // Only keep the 10 most recent builds
@@ -38,15 +39,13 @@ pipeline {
                             sh "mvn -f usef-build/pom.xml versions:set -DnewVersion=$version"
                             sh 'mvn -f usef-build/pom.xml clean deploy -DskipTests'
 
+                            sh 'git tag -a $version'
+                            sh 'git push https://${GITUSER_USR}:${GITUSER_PSW}@github.com/Alliander/ri.usef.energy.git $version'
+
                         } else {
                             sh 'mvn -f usef-build/pom.xml clean deploy -DskipTests'
                         }
                     }
-                }
-
-                withCredentials([usernamePassword(credentialsId: 'jenkins-dynamo')]) {
-                    sh 'git tag -a $version'
-                    sh 'git push --tags'
                 }
             }
         }
