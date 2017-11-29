@@ -100,6 +100,12 @@
       </dependency>
       <dependency>
         <groupId>org.jboss.resteasy</groupId>
+        <artifactId>resteasy-client</artifactId>
+        <version>3.0.8.Final</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.resteasy</groupId>
         <artifactId>resteasy-jaxrs</artifactId>
         <version>3.0.8.Final</version>
         <scope>provided</scope>
@@ -185,6 +191,11 @@
         <groupId>org.apache.httpcomponents</groupId>
         <artifactId>httpcore</artifactId>
         <version>4.4.4</version>
+      </dependency>
+      <dependency>
+        <groupId>net.jodah</groupId>
+        <artifactId>recurrent</artifactId>
+        <version>0.3.3</version>
       </dependency>
 
       <!-- Test dependencies -->
