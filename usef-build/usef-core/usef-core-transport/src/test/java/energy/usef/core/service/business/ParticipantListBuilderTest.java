@@ -65,7 +65,7 @@ public class ParticipantListBuilderTest {
 
         ParticipantRole p1r1 = p1.getRoles().get(0);
         assertNotNull(p1r1);
-        assertEquals("http://usef.energy/usef.energy_agr/Something", p1r1.getUrl());
+        assertEquals("http://usef.energy/usef.energy_agr/participants_dns_info.yaml", p1r1.getUrl());
         assertEquals(2, p1r1.getPublicKeys().size());
         assertEquals(USEFRole.AGR, p1r1.getUsefRole());
 
@@ -78,7 +78,7 @@ public class ParticipantListBuilderTest {
 
         ParticipantRole p2r1 = p2.getRoles().get(0);
         assertNotNull(p2r1);
-        assertEquals("http://usef.energy/usef.energy_dso/Something", p2r1.getUrl());
+        assertEquals("http://usef.energy/usef.energy_dso/participants_dns_info.yaml", p2r1.getUrl());
         assertEquals(2, p2r1.getPublicKeys().size());
         assertEquals(USEFRole.DSO, p2r1.getUsefRole());
 
