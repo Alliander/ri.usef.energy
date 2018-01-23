@@ -18,13 +18,22 @@ package energy.usef.core.service.business;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import javax.ejb.Singleton;
 import javax.inject.Inject;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import energy.usef.core.model.ParticipantKey;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,6 +71,18 @@ public class ParticipantDiscoveryService {
     private static final String PUBLIC_KEY_PREFIX = "cs1.";
     private static final String PARTICIPANTS_YAML = "participants_dns_info.yaml";
     private static final String SUPPORTED_USEF_VERSION = "2015";
+
+    private final LoadingCache<ParticipantKey, energy.usef.core.model.Participant> participantCache = CacheBuilder.newBuilder()
+            .maximumSize(1000)
+            .expireAfterWrite(10, TimeUnit.MINUTES)
+            .build(
+                    new CacheLoader<ParticipantKey, energy.usef.core.model.Participant>() {
+                        public energy.usef.core.model.Participant load(ParticipantKey key) throws Exception {
+                            ObjectMapper mapper = new ObjectMapper();
+                            String url = config.getProperty(ConfigParam.PARTICIPANT_SERVICE_URL) +"/" + key.getDomain() + "/" + key.getRole();
+                            return mapper.readValue(new URL(url), energy.usef.core.model.Participant.class);
+                        }
+                    });
 
     private static Resolver resolver = null;
 
@@ -101,7 +122,11 @@ public class ParticipantDiscoveryService {
         // check if one bypasses the DNS verification
         if (byPassDNSCheck()) {
             LOGGER.warn("DNS verification is bypassed.");
-            return findParticipantInLocalConfiguration(domain, participantRole);
+            if (useParticipantService()) {
+                return findParticipantInParticipantService(domain, participantRole);
+            } else {
+                return findParticipantInLocalConfiguration(domain, participantRole);
+            }
         } else {
             LOGGER.info("DNS verification is active.");
             return findParticipantInDns(domain, participantRole);
@@ -126,7 +151,12 @@ public class ParticipantDiscoveryService {
 
         if (byPassDNSCheck()) {
             checkSenderDomainAndRoleAvailable(incomingMessage);
-            value = findLocalParticipantUnsigningPublicKey(senderDomain, senderRole);
+            if (useParticipantService()) {
+                value = findUnsealingKeyInParticipantService(senderDomain, senderRole);
+            }
+            else {
+                value = findLocalParticipantUnsigningPublicKey(senderDomain, senderRole);
+            }
         } else {
             value = getPublicUnsealingKey(senderDomain, senderRole);
         }
@@ -140,7 +170,7 @@ public class ParticipantDiscoveryService {
      * @param participantRole - {@link USEFRole} indicating the participant's role.
      * @throws BusinessException if no participant is matching the sender.
      */
-    private Participant findParticipantInLocalConfiguration(String domain, USEFRole participantRole)
+    protected Participant findParticipantInLocalConfiguration(String domain, USEFRole participantRole)
             throws BusinessException {
 
         String participantDnsFileName = Config.getConfigurationFolder() +
@@ -277,25 +307,53 @@ public class ParticipantDiscoveryService {
         return result.get(0);
     }
 
-    private String findLocalParticipantUnsigningPublicKey(String senderDomain, USEFRole senderRole) throws BusinessException {
-        String participantDnsFileName = Config.getConfigurationFolder() +
-                config.getProperty(ConfigParam.PARTICIPANT_DNS_INFO_FILENAME);
-        if (!isFileExists(participantDnsFileName)) {
-            participantDnsFileName = AbstractConfig.DOMAIN_CONFIG_FOLDER + File.separator + PARTICIPANTS_YAML;
-        }
-        List<Participant> participants = participantListBuilder.buildParticipantList(participantDnsFileName);
-        checkParticipantsListIsAvailable(participants);
+    protected Participant findParticipantInParticipantService(String senderDomain, USEFRole senderRole) throws BusinessException {
+        try {
+            energy.usef.core.model.Participant p = participantCache.get(new ParticipantKey(senderDomain, senderRole.value()));
 
-        for (Participant participant : participants) {
-            if (!senderDomain.equals(participant.getDomainName())) {
-                continue;
+            Participant participant = new Participant();
+            participant.setDomainName(p.getDomain());
+            participant.setSpecVersion(p.getVersion());
+            participant.setUsefRole(USEFRole.fromValue(p.getRole()));
+
+            ParticipantRole participantRole = new ParticipantRole(USEFRole.fromValue(p.getRole()));
+            participantRole.setUrl(p.getUrl());
+            participantRole.setPublicKeysFromString(p.getPublicKeys());
+            participant.setRoles(new ArrayList<>());
+            participant.getRoles().add(participantRole);
+            return participant;
+        } catch (ExecutionException e) {
+            throw new BusinessException(ParticipantDiscoveryError.PARTICIPANT_NOT_FOUND);
+        }
+    }
+    protected String findUnsealingKeyInParticipantService(String senderDomain, USEFRole senderRole) throws BusinessException {
+        try {
+            return participantCache.get(new ParticipantKey(senderDomain, senderRole.value())).getUnsealingKey();
+        } catch (ExecutionException e) {
+            throw new BusinessException(ParticipantDiscoveryError.PARTICIPANT_NOT_FOUND);
+        }
+    }
+
+    protected String findLocalParticipantUnsigningPublicKey(String senderDomain, USEFRole senderRole) throws BusinessException {
+
+            String participantDnsFileName = Config.getConfigurationFolder() +
+                    config.getProperty(ConfigParam.PARTICIPANT_DNS_INFO_FILENAME);
+            if (!isFileExists(participantDnsFileName)) {
+                participantDnsFileName = AbstractConfig.DOMAIN_CONFIG_FOLDER + File.separator + PARTICIPANTS_YAML;
             }
-            for (ParticipantRole role : participant.getRoles()) {
-                if (senderRole.equals(role.getUsefRole())) {
-                    return role.getPublicKeys().get(0);
+            List<Participant> participants = participantListBuilder.buildParticipantList(participantDnsFileName);
+            checkParticipantsListIsAvailable(participants);
+
+            for (Participant participant : participants) {
+                if (!senderDomain.equals(participant.getDomainName())) {
+                    continue;
+                }
+                for (ParticipantRole role : participant.getRoles()) {
+                    if (senderRole.equals(role.getUsefRole())) {
+                        return role.getPublicKeys().get(0);
+                    }
                 }
             }
-        }
         return null;
     }
 
@@ -324,5 +382,9 @@ public class ParticipantDiscoveryService {
 
     private boolean byPassDNSCheck() {
         return config.getBooleanProperty(ConfigParam.BYPASS_DNS_VERIFICATION);
+    }
+
+    private boolean useParticipantService() {
+        return config.getProperty(ConfigParam.PARTICIPANT_SERVICE_URL) != null;
     }
 }

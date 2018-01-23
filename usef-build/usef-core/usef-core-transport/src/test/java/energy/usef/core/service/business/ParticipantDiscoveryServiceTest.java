@@ -79,6 +79,7 @@ public class ParticipantDiscoveryServiceTest {
         Whitebox.setInternalState(service, "resolver", resolver);
 
         Mockito.when(config.getBooleanProperty(ConfigParam.BYPASS_DNS_VERIFICATION)).thenReturn(true);
+        Mockito.when(config.getProperty(ConfigParam.PARTICIPANT_SERVICE_URL)).thenReturn(null);
 
         Mockito.when(listBuilder.buildParticipantList(Matchers.anyString()))
                 .thenReturn(buildParticipantList());

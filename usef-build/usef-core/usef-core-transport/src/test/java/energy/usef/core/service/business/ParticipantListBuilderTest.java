@@ -25,6 +25,7 @@ import energy.usef.core.data.xml.bean.message.USEFRole;
 
 import java.util.List;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
