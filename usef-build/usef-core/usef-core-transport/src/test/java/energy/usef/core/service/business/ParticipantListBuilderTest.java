@@ -25,6 +25,7 @@ import energy.usef.core.data.xml.bean.message.USEFRole;
 
 import java.util.List;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,6 +48,10 @@ public class ParticipantListBuilderTest {
         builder = new ParticipantListBuilder();
     }
 
+    @After
+    public void reset() {
+        usefEndpoint.resetAll();
+    }
     /**
      * Builds a participant list from the file {@link #PARTICIPANTS_DNS_INFO_TEST_YAML}. Each attribute specified in the yaml file
      * is verified.
