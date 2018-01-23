@@ -93,6 +93,7 @@ import static org.powermock.reflect.Whitebox.setInternalState;
 
     @Test
     public void testFindParticipantInLocalConfiguration() {
+        Mockito.when(config.getProperty(Matchers.eq(ConfigParam.PARTICIPANT_SERVICE_URL))).thenReturn("");
         Mockito.when(config.getBooleanProperty(Matchers.eq(ConfigParam.BYPASS_DNS_VERIFICATION))).thenReturn(Boolean.TRUE);
         Mockito.when(config.getProperty(Matchers.eq(ConfigParam.PARTICIPANT_DNS_INFO_FILENAME))).thenReturn(
                 "participants_dns_info.yaml");
@@ -100,8 +101,6 @@ import static org.powermock.reflect.Whitebox.setInternalState;
             String p1 = service.findLocalParticipantUnsigningPublicKey("aggregator.energy", USEFRole.AGR);
 
             Mockito.when(config.getProperty(Matchers.eq(ConfigParam.PARTICIPANT_SERVICE_URL))).thenReturn("http://localhost:6667/api/participants");
-
-
             String p2 = service.findUnsealingKeyInParticipantService("aggregator.energy", USEFRole.AGR);
             assertEquals(p1, p2);
         } catch (BusinessException e) {
@@ -109,4 +108,20 @@ import static org.powermock.reflect.Whitebox.setInternalState;
         }
     }
 
+    @Test
+    public void testFindParticipantInLocalConfiguration2() {
+        Mockito.when(config.getProperty(Matchers.eq(ConfigParam.PARTICIPANT_SERVICE_URL))).thenReturn(null);
+        Mockito.when(config.getBooleanProperty(Matchers.eq(ConfigParam.BYPASS_DNS_VERIFICATION))).thenReturn(Boolean.TRUE);
+        Mockito.when(config.getProperty(Matchers.eq(ConfigParam.PARTICIPANT_DNS_INFO_FILENAME))).thenReturn(
+                "participants_dns_info.yaml");
+        try {
+            String p1 = service.findLocalParticipantUnsigningPublicKey("aggregator.energy", USEFRole.AGR);
+
+            Mockito.when(config.getProperty(Matchers.eq(ConfigParam.PARTICIPANT_SERVICE_URL))).thenReturn("http://localhost:6667/api/participants");
+            String p2 = service.findUnsealingKeyInParticipantService("aggregator.energy", USEFRole.AGR);
+            assertEquals(p1, p2);
+        } catch (BusinessException e) {
+            assertEquals(ParticipantDiscoveryError.PARTICIPANT_NOT_FOUND, e.getBusinessError());
+        }
+    }
 }
