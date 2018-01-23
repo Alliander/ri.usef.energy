@@ -9,6 +9,7 @@ import energy.usef.core.data.participant.ParticipantRole;
 import energy.usef.core.data.xml.bean.message.USEFRole;
 import energy.usef.core.exception.BusinessException;
 import energy.usef.core.service.business.error.ParticipantDiscoveryError;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -46,6 +47,10 @@ import static org.powermock.reflect.Whitebox.setInternalState;
         setInternalState(service, "participantListBuilder", participantListBuilder);
 
         usefEndpoint.stubFor(WireMock.post(urlEqualTo("/api/participants/aggregator.energy/AGR")).willReturn(aResponse().withBody(BODY).withHeader("content-type","application/json;charset=UTF-8").withStatus(200)));
+    }
+    @After
+    public void reset() {
+        usefEndpoint.resetAll();
     }
 
     @Test
