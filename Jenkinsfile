@@ -28,13 +28,13 @@ pipeline {
                             def pom = readMavenPom file: 'usef-build/pom.xml'
                             env.devVersion = pom.version
                             env.version = pom.version.replace("-SNAPSHOT", ".${currentBuild.number}")
-                            sh "mvn -f usef-build/pom.xml versions:set -DnewVersion=$version"
+                            sh "mvn -B -f usef-build/pom.xml versions:set -DnewVersion=$version"
                             sh 'mvn -B -f usef-build/pom.xml clean deploy'
 
                             sh 'git tag -a $version -m "New release"'
                             sh 'git push https://${GITUSER_USR}:${GITUSER_PSW}@github.com/Alliander/ri.usef.energy.git $version'
                         } else {
-                            sh 'mvn -f usef-build/pom.xml clean deploy'
+                            sh 'mvn -B -f usef-build/pom.xml clean deploy'
                         }
                     }
                 }
