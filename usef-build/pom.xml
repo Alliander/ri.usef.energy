@@ -629,7 +629,7 @@
         <repository>
             <id>central</id>
             <name>dynamo-release</name>
-            <url>http://artifactory:801/artifactory/dynamo-libs-release</url>
+            <url>http://artifactory:8081/artifactory/dynamo-libs-release</url>
         </repository>
         <snapshotRepository>
             <id>snapshots</id>
