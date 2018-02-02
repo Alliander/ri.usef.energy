@@ -508,7 +508,7 @@
                                 <review.team>qa</review.team>
                             </deployProperties>
                             <publisher>
-                                <contextUrl>http://artifactory.usef-dynamo.nl/artifactory</contextUrl>
+                                <contextUrl>http://artifactory:8081/artifactory</contextUrl>
                                 <username>${env.ARTIFACTORY_USERNAME}</username>
                                 <password>${env.ARTIFACTORY_PASSWORD}</password>
                                 <repoKey>dynamo-libs-release</repoKey>
@@ -624,17 +624,4 @@
         <developerConnection>scm:git:ssh://git@github.com:Alliander/ri.usef.energy.git</developerConnection>
         <url>https://github.com/Alliander/ri.usef.energy</url>
     </scm>
-
-    <distributionManagement>
-        <repository>
-            <id>central</id>
-            <name>dynamo-release</name>
-            <url>http://artifactory:8081/artifactory/dynamo-libs-release</url>
-        </repository>
-        <snapshotRepository>
-            <id>snapshots</id>
-            <name>dynamo-snapshot</name>
-            <url>http://artifactory:8081/artifactory/dynamo-libs-snapshot</url>
-        </snapshotRepository>
-    </distributionManagement>
 </project>
