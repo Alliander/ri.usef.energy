@@ -330,6 +330,8 @@ public class ParticipantDiscoveryService {
         try {
             return participantCache.get(new ParticipantKey(senderDomain, senderRole.value())).getUnsealingKey();
         } catch (ExecutionException e) {
+            LOGGER.error("Error while retrieving the key for sender domain {} and sender role: {}", senderDomain, senderRole);
+            LOGGER.error("Exception is: {}", e);
             throw new BusinessException(ParticipantDiscoveryError.PARTICIPANT_NOT_FOUND);
         }
     }
