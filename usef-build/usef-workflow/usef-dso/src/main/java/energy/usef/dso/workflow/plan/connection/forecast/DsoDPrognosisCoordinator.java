@@ -18,10 +18,7 @@ package energy.usef.dso.workflow.plan.connection.forecast;
 
 import java.util.List;
 
-import javax.ejb.Asynchronous;
-import javax.ejb.Lock;
-import javax.ejb.LockType;
-import javax.ejb.Singleton;
+import javax.ejb.*;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.enterprise.event.TransactionPhase;
@@ -45,6 +42,10 @@ import energy.usef.dso.model.Aggregator;
 import energy.usef.dso.service.business.DsoPlanboardBusinessService;
 import energy.usef.dso.workflow.validate.gridsafetyanalysis.GridSafetyAnalysisEvent;
 
+import static energy.usef.core.constant.USEFConstants.LOG_COORDINATOR_FINISHED_HANDLING_EVENT;
+import static energy.usef.core.constant.USEFConstants.LOG_COORDINATOR_START_HANDLING_EVENT;
+import static java.util.concurrent.TimeUnit.SECONDS;
+
 /**
  * DSO Non Aggreagator Connection Forecast workflow, Plan board sub-flow workflow coordinator.
  */
@@ -65,9 +66,11 @@ public class DsoDPrognosisCoordinator {
     @Inject
     private Event<DPrognosisReceivedEvent> dPrognosisReceivedEventManager;
 
+    @Asynchronous
     @Lock(LockType.WRITE)
+    @AccessTimeout(value=10, unit=SECONDS)
     public void handleDPrognosisReceivedEvent(@Observes(during = TransactionPhase.AFTER_COMPLETION) DPrognosisReceivedEvent event) {
-        LOGGER.error("start handleDPrognosisReceivedEvent");
+        LOGGER.info(LOG_COORDINATOR_START_HANDLING_EVENT, event);
 
         Prognosis prognosis = event.getPrognosis();
         Message savedMessage = event.getSavedMessage();
@@ -75,21 +78,17 @@ public class DsoDPrognosisCoordinator {
         List<PtuPrognosis> existingPtuPrognoses = corePlanboardBusinessService
                 .findLastPrognoses(prognosis.getPeriod(), PrognosisType.D_PROGNOSIS, prognosis.getCongestionPoint());
 
-        LOGGER.error("before handleupdated handleDPrognosisReceivedEvent");
         if (isPrognosisNewPrognosis(prognosis, existingPtuPrognoses)) {
             LOGGER.info("New prognosis received.");
         } else {
             LOGGER.info("Updated prognosis received.");
             dsoPlanboardBusinessService.handleUpdatedPrognosis(prognosis, existingPtuPrognoses);
         }
-        LOGGER.error("before store handleDPrognosisReceivedEvent");
-
-
         corePlanboardBusinessService.storePrognosis(prognosis.getCongestionPoint(), prognosis, DocumentType.D_PROGNOSIS,
                 DocumentStatus.ACCEPTED, prognosis.getMessageMetadata().getSenderDomain(), savedMessage, false);
 
-        //triggerGridSafetyAnalysisWorkflow(prognosis.getPeriod(), prognosis.getCongestionPoint());
-        LOGGER.error("end handleDPrognosisReceivedEvent");
+        triggerGridSafetyAnalysisWorkflow(prognosis.getPeriod(), prognosis.getCongestionPoint());
+        LOGGER.info(LOG_COORDINATOR_FINISHED_HANDLING_EVENT, event);
     }
 
     /**
