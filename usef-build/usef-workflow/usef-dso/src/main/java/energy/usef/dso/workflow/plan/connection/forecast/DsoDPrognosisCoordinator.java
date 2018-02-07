@@ -65,7 +65,6 @@ public class DsoDPrognosisCoordinator {
     @Inject
     private Event<DPrognosisReceivedEvent> dPrognosisReceivedEventManager;
 
-    @Asynchronous
     @Lock(LockType.WRITE)
     public void handleDPrognosisReceivedEvent(@Observes(during = TransactionPhase.AFTER_COMPLETION) DPrognosisReceivedEvent event) {
         LOGGER.error("start handleDPrognosisReceivedEvent");
