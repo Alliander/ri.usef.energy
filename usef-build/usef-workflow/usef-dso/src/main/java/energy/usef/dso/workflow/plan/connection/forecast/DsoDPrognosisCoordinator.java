@@ -68,6 +68,7 @@ public class DsoDPrognosisCoordinator {
     @Asynchronous
     @Lock(LockType.WRITE)
     public void handleDPrognosisReceivedEvent(@Observes(during = TransactionPhase.AFTER_COMPLETION) DPrognosisReceivedEvent event) {
+        LOGGER.error("start handleDPrognosisReceivedEvent");
 
         Prognosis prognosis = event.getPrognosis();
         Message savedMessage = event.getSavedMessage();
@@ -75,16 +76,21 @@ public class DsoDPrognosisCoordinator {
         List<PtuPrognosis> existingPtuPrognoses = corePlanboardBusinessService
                 .findLastPrognoses(prognosis.getPeriod(), PrognosisType.D_PROGNOSIS, prognosis.getCongestionPoint());
 
+        LOGGER.error("before handleupdated handleDPrognosisReceivedEvent");
         if (isPrognosisNewPrognosis(prognosis, existingPtuPrognoses)) {
             LOGGER.info("New prognosis received.");
         } else {
             LOGGER.info("Updated prognosis received.");
             dsoPlanboardBusinessService.handleUpdatedPrognosis(prognosis, existingPtuPrognoses);
         }
+        LOGGER.error("before store handleDPrognosisReceivedEvent");
+
+
         corePlanboardBusinessService.storePrognosis(prognosis.getCongestionPoint(), prognosis, DocumentType.D_PROGNOSIS,
                 DocumentStatus.ACCEPTED, prognosis.getMessageMetadata().getSenderDomain(), savedMessage, false);
 
         //triggerGridSafetyAnalysisWorkflow(prognosis.getPeriod(), prognosis.getCongestionPoint());
+        LOGGER.error("end handleDPrognosisReceivedEvent");
     }
 
     /**
