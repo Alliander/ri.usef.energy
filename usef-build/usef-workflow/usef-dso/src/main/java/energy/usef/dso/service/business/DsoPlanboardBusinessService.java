@@ -395,6 +395,7 @@ public class DsoPlanboardBusinessService {
      * congestion point on a specific period.
      */
     public void handleUpdatedPrognosis(Prognosis prognosis, List<PtuPrognosis> existingPtuPrognoses) {
+        LOGGER.error("start handleUpdatedPrognosis");
         String aggregatorDomain = prognosis.getMessageMetadata().getSenderDomain();
         Long latestPrognosisSequence = getDocumentLatestSequenceNumber(existingPtuPrognoses, aggregatorDomain);
 
@@ -438,6 +439,7 @@ public class DsoPlanboardBusinessService {
                 }
             }
         }
+        LOGGER.error("finished handleUpdatedPrognosis");
     }
 
     /**
