@@ -84,7 +84,7 @@ public class DsoDPrognosisCoordinator {
         corePlanboardBusinessService.storePrognosis(prognosis.getCongestionPoint(), prognosis, DocumentType.D_PROGNOSIS,
                 DocumentStatus.ACCEPTED, prognosis.getMessageMetadata().getSenderDomain(), savedMessage, false);
 
-        triggerGridSafetyAnalysisWorkflow(prognosis.getPeriod(), prognosis.getCongestionPoint());
+        //triggerGridSafetyAnalysisWorkflow(prognosis.getPeriod(), prognosis.getCongestionPoint());
     }
 
     /**
