@@ -90,7 +90,6 @@ public class DsoDPrognosisCoordinator {
     /**
      * {@inheritDoc}
      */
-    @Lock(LockType.WRITE)
     public void invokeWorkflow(Prognosis prognosis, Message savedMessage) {
         dPrognosisReceivedEventManager.fire(new DPrognosisReceivedEvent(prognosis, savedMessage));
     }
