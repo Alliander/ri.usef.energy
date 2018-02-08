@@ -16,35 +16,24 @@
 
 package energy.usef.dso.workflow.plan.connection.forecast;
 
-import java.util.List;
-
-import javax.ejb.*;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.enterprise.event.TransactionPhase;
-import javax.inject.Inject;
-
-import energy.usef.core.exception.BusinessValidationException;
+import energy.usef.core.data.xml.bean.message.Prognosis;
+import energy.usef.core.model.*;
+import energy.usef.core.service.business.CorePlanboardBusinessService;
+import energy.usef.dso.model.Aggregator;
+import energy.usef.dso.service.business.DsoPlanboardBusinessService;
 import energy.usef.dso.workflow.DPrognosisReceivedEvent;
+import energy.usef.dso.workflow.validate.gridsafetyanalysis.GridSafetyAnalysisEvent;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import energy.usef.core.data.xml.bean.message.Prognosis;
-import energy.usef.core.model.DocumentStatus;
-import energy.usef.core.model.DocumentType;
-import energy.usef.core.model.Message;
-import energy.usef.core.model.PlanboardMessage;
-import energy.usef.core.model.PrognosisType;
-import energy.usef.core.model.PtuPrognosis;
-import energy.usef.core.service.business.CorePlanboardBusinessService;
-import energy.usef.dso.model.Aggregator;
-import energy.usef.dso.service.business.DsoPlanboardBusinessService;
-import energy.usef.dso.workflow.validate.gridsafetyanalysis.GridSafetyAnalysisEvent;
+import javax.ejb.Singleton;
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
+import java.util.List;
 
 import static energy.usef.core.constant.USEFConstants.LOG_COORDINATOR_FINISHED_HANDLING_EVENT;
 import static energy.usef.core.constant.USEFConstants.LOG_COORDINATOR_START_HANDLING_EVENT;
-import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
  * DSO Non Aggreagator Connection Forecast workflow, Plan board sub-flow workflow coordinator.
@@ -63,17 +52,8 @@ public class DsoDPrognosisCoordinator {
     @Inject
     private DsoPlanboardBusinessService dsoPlanboardBusinessService;
 
-    @Inject
-    private Event<DPrognosisReceivedEvent> dPrognosisReceivedEventManager;
-
-    @Asynchronous
-    @Lock(LockType.WRITE)
-    @AccessTimeout(value=10, unit=SECONDS)
-    public void handleDPrognosisReceivedEvent(@Observes(during = TransactionPhase.AFTER_COMPLETION) DPrognosisReceivedEvent event) {
-        LOGGER.info(LOG_COORDINATOR_START_HANDLING_EVENT, event);
-
-        Prognosis prognosis = event.getPrognosis();
-        Message savedMessage = event.getSavedMessage();
+    public void invokeWorkflow(Prognosis prognosis, Message savedMessage) {
+        LOGGER.info(LOG_COORDINATOR_START_HANDLING_EVENT, prognosis);
 
         List<PtuPrognosis> existingPtuPrognoses = corePlanboardBusinessService
                 .findLastPrognoses(prognosis.getPeriod(), PrognosisType.D_PROGNOSIS, prognosis.getCongestionPoint());
@@ -88,14 +68,7 @@ public class DsoDPrognosisCoordinator {
                 DocumentStatus.ACCEPTED, prognosis.getMessageMetadata().getSenderDomain(), savedMessage, false);
 
         triggerGridSafetyAnalysisWorkflow(prognosis.getPeriod(), prognosis.getCongestionPoint());
-        LOGGER.info(LOG_COORDINATOR_FINISHED_HANDLING_EVENT, event);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void invokeWorkflow(Prognosis prognosis, Message savedMessage) {
-        dPrognosisReceivedEventManager.fire(new DPrognosisReceivedEvent(prognosis, savedMessage));
+        LOGGER.info(LOG_COORDINATOR_FINISHED_HANDLING_EVENT, prognosis);
     }
 
     private boolean isPrognosisNewPrognosis(Prognosis dprognosis, List<PtuPrognosis> prognoses) {

@@ -67,7 +67,7 @@ public class PrognosisController extends BaseIncomingMessageController<Prognosis
     /**
      * {@inheritDoc}
      */
-    public void action(Prognosis prognosis, Message savedMessage) throws BusinessException {
+    public void action(Prognosis prognosis, Message savedMessage) {
         LOGGER.info("Prognosis received");
         String entityAddress = prognosis.getCongestionPoint();
         String errorMessage = null;
