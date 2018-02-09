@@ -21,7 +21,6 @@ import energy.usef.core.model.*;
 import energy.usef.core.service.business.CorePlanboardBusinessService;
 import energy.usef.dso.model.Aggregator;
 import energy.usef.dso.service.business.DsoPlanboardBusinessService;
-import energy.usef.dso.workflow.DPrognosisReceivedEvent;
 import energy.usef.dso.workflow.validate.gridsafetyanalysis.GridSafetyAnalysisEvent;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
