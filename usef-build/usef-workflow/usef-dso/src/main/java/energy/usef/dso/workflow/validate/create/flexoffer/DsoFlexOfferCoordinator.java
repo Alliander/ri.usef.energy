@@ -47,6 +47,7 @@ import energy.usef.dso.workflow.DsoWorkflowStep;
 import energy.usef.dso.workflow.coloring.ColoringProcessEvent;
 import energy.usef.dso.workflow.validate.create.flexorder.FlexOrderEvent;
 import energy.usef.dso.workflow.validate.create.flexorder.PlaceFlexOrdersStepParameter;
+
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.ejb.Asynchronous;
@@ -56,6 +57,7 @@ import javax.ejb.Singleton;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
+
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
@@ -95,7 +97,6 @@ public class DsoFlexOfferCoordinator {
      * @param event The {@link FlexOrderEvent} event.
      */
     @Asynchronous
-    @Lock(LockType.WRITE)
     public void handleEvent(@Observes FlexOfferReceivedEvent event) {
         LOGGER.info(LOG_COORDINATOR_START_HANDLING_EVENT, event);
         FlexOffer flexOffer = event.getFlexOffer();
@@ -127,7 +128,7 @@ public class DsoFlexOfferCoordinator {
             List<PtuFlexOffer> ptuFlexOffers = corePlanboardBusinessService.storeFlexOffer(usefIdentifier, flexOffer, DocumentStatus.ACCEPTED,
                     flexOffer.getMessageMetadata().getSenderDomain());
 
-            invokePlaceFlexOffersPBC(flexRequestMessage.getExpirationDate(), FlexOfferTransformer.transformPtuFlexOffers(ptuFlexOffers), usefIdentifier, flexOffer.getPeriod());
+            invokePlaceFlexOffersPBC(flexOffer.getExpirationDateTime(), FlexOfferTransformer.transformPtuFlexOffers(ptuFlexOffers), usefIdentifier, flexOffer.getPeriod());
 
             // update status (RECEIVED_OFFER or RECEIVED_EMPTY_OFFER) of the flex requests
             updateFlexRequestsStatus(flexOffer, flexRequestMessage);
@@ -212,8 +213,9 @@ public class DsoFlexOfferCoordinator {
                 response.getMessageMetadata().getConversationID());
     }
 
-    @SuppressWarnings("unchecked") private void invokePlaceFlexOffersPBC(LocalDateTime expirationDate,
-            FlexOfferDto flexOfferDto, String congestionPoint, LocalDate period) {
+    @SuppressWarnings("unchecked")
+    private void invokePlaceFlexOffersPBC(LocalDateTime expirationDate,
+                                          FlexOfferDto flexOfferDto, String congestionPoint, LocalDate period) {
         WorkflowContext inContext = new DefaultWorkflowContext();
         flexOfferDto.setExpirationDateTime(expirationDate);
         inContext.setValue(PlaceFlexOfferStepParameter.IN.FLEX_OFFER_DTO.name(), flexOfferDto);
@@ -222,26 +224,5 @@ public class DsoFlexOfferCoordinator {
         inContext.setValue(PlaceFlexOrdersStepParameter.IN.PERIOD.name(), period);
 
         workflowStubLoader.invoke(DsoWorkflowStep.DSO_RECEIVE_FLEX_OFFER.name(), inContext);
-    }
-
-    public void validatePTUsForPeriod(List<PTU> ptus, LocalDate period, boolean normalized) throws BusinessValidationException {
-        int numberOfPtusPerDay = PtuUtil.getNumberOfPtusPerDay(period, config.getIntegerProperty(ConfigParam.PTU_DURATION));
-        List<PTU> normalizedPtus = ptus;
-        if (!normalized) {
-            normalizedPtus = PtuListConverter.normalize(normalizedPtus);
-        }
-        if (normalizedPtus == null || numberOfPtusPerDay != normalizedPtus.size()) {
-            throw new BusinessValidationException(CoreBusinessError.WRONG_NUMBER_OF_PTUS, normalizedPtus.size(),
-                    numberOfPtusPerDay);
-        }
-        // check if all are present
-        PtuUtil.orderByStart(normalizedPtus);
-        int expectedStart = 1;
-        for (PTU ptu : normalizedPtus) {
-            if (ptu.getStart().intValue() != expectedStart) {
-                throw new BusinessValidationException(CoreBusinessError.INCOMPLETE_PTUS, expectedStart);
-            }
-            expectedStart++;
-        }
     }
 }
