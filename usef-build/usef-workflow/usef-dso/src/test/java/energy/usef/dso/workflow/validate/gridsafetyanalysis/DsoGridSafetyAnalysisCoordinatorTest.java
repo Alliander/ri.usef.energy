@@ -29,6 +29,7 @@ import javax.enterprise.event.Event;
 
 import energy.usef.core.event.validation.EventValidationService;
 import energy.usef.core.exception.BusinessValidationException;
+import energy.usef.core.workflow.WorkflowStep;
 import org.joda.time.LocalDate;
 import org.junit.Assert;
 import org.junit.Before;
@@ -38,6 +39,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
 import org.slf4j.Logger;
@@ -71,6 +73,9 @@ import energy.usef.dso.workflow.coloring.ColoringProcessEvent;
 import energy.usef.dso.workflow.dto.GridSafetyAnalysisDto;
 import energy.usef.dso.workflow.dto.PtuGridSafetyAnalysisDto;
 import energy.usef.dso.workflow.validate.create.flexrequest.CreateFlexRequestEvent;
+
+import static energy.usef.dso.workflow.DsoWorkflowStep.DSO_CREATE_FLEX_REQUEST;
+import static energy.usef.dso.workflow.DsoWorkflowStep.DSO_CREATE_GRID_SAFETY_ANALYSIS;
 
 /**
  * Test class in charge of the unit tests related to the {@link DsoGridSafetyAnalysisCoordinator} class.
@@ -116,6 +121,9 @@ public class DsoGridSafetyAnalysisCoordinatorTest {
     @Mock
     private EventValidationService eventValidationService;
 
+    @Mock
+    private WorkflowStep workflowStep;
+
     @Before
     public void init() throws Exception {
         dsoGridSafetyAnalysisCoordinator = new DsoGridSafetyAnalysisCoordinator();
@@ -156,6 +164,15 @@ public class DsoGridSafetyAnalysisCoordinatorTest {
      */
     @Test
     public void invokeWorkflowWithWrongPtuDate() throws BusinessValidationException {
+        WorkflowContext resultWorkflowContext = new DefaultWorkflowContext();
+        Mockito.when(workflowStepExecuter.invoke(Mockito.anyString(), Mockito.any())).thenReturn(resultWorkflowContext);
+        PowerMockito.when(workflowStepExecuter.invoke(Mockito.eq(DSO_CREATE_GRID_SAFETY_ANALYSIS.name()),
+                Mockito.any(WorkflowContext.class)))
+                .then(call -> {
+                    WorkflowContext context = (WorkflowContext) call.getArguments()[1];
+                    context.setValue(CreateGridSafetyAnalysisStepParameter.OUT.GRID_SAFETY_ANALYSIS.name(), new GridSafetyAnalysisDto());
+                    return context;
+                });
         LocalDate ptuDate = new LocalDate().minusDays(2);
         dsoGridSafetyAnalysisCoordinator.startGridSafetyAnalysis(new GridSafetyAnalysisEvent(ENTITY_ADDRESS, ptuDate));
         Mockito.verify(eventValidationService, Mockito.times(1));
@@ -212,6 +229,15 @@ public class DsoGridSafetyAnalysisCoordinatorTest {
      */
     @Test
     public void testWithNoAggregators() throws BusinessValidationException {
+        WorkflowContext resultWorkflowContext = new DefaultWorkflowContext();
+        Mockito.when(workflowStepExecuter.invoke(Mockito.anyString(), Mockito.any())).thenReturn(resultWorkflowContext);
+        PowerMockito.when(workflowStepExecuter.invoke(Mockito.eq(DSO_CREATE_GRID_SAFETY_ANALYSIS.name()),
+                Mockito.any(WorkflowContext.class)))
+                .then(call -> {
+                    WorkflowContext context = (WorkflowContext) call.getArguments()[1];
+                    context.setValue(CreateGridSafetyAnalysisStepParameter.OUT.GRID_SAFETY_ANALYSIS.name(), new GridSafetyAnalysisDto());
+                    return context;
+                });
         LocalDate ptuDate = new LocalDate().plusDays(2);
         ArgumentCaptor<WorkflowContext> inputContextCaptor = ArgumentCaptor.forClass(WorkflowContext.class);
 

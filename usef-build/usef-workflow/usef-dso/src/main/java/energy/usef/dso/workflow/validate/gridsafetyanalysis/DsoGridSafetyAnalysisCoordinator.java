@@ -27,10 +27,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import javax.ejb.Asynchronous;
-import javax.ejb.Stateless;
+import javax.ejb.*;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.enterprise.event.TransactionPhase;
@@ -101,9 +101,6 @@ public class DsoGridSafetyAnalysisCoordinator {
     private ConfigDso configDso;
 
     @Inject
-    private ConcurrentUtil concurrentUtil;
-
-    @Inject
     private SequenceGeneratorService sequenceGeneratorService;
 
     @Inject
@@ -124,6 +121,8 @@ public class DsoGridSafetyAnalysisCoordinator {
      */
 
     @Asynchronous
+    @Lock(LockType.READ)
+    @AccessTimeout(value=10, unit = TimeUnit.MINUTES)
     public void startGridSafetyAnalysis(@Observes(during = TransactionPhase.AFTER_COMPLETION) GridSafetyAnalysisEvent event) throws BusinessValidationException {
         LOGGER.info(LOG_COORDINATOR_START_HANDLING_EVENT, event);
         eventValidationService.validateEventPeriodTodayOrInFuture(event);
@@ -134,37 +133,18 @@ public class DsoGridSafetyAnalysisCoordinator {
         // PrognosisDto List, one for each participant
         List<PtuPrognosis> prognosisList = findLastPrognoses(period, entityAddress);
         WorkflowContext inContext = prepareInContext(event, prognosisList);
-        Long timeout = configDso.getLongProperty(ConfigDsoParam.DSO_GRID_SAFETY_ANALYSIS_EXPIRATION_IN_MINUTES);
 
-        CompletableFuture<WorkflowContext> completableFuture = CompletableFuture
-                .supplyAsync(() -> callPluggableBusinessComponent(inContext));
+        WorkflowContext workflowContext = workflowStepExecuter.invoke(DSO_CREATE_GRID_SAFETY_ANALYSIS.name(), inContext);
+        LOGGER.info("Processing Grid Gafety Analysis for {}", workflowContext.getValue(IN.CONGESTION_POINT_ENTITY_ADDRESS.name()));
+        WorkflowUtil
+                .validateContext(DSO_CREATE_GRID_SAFETY_ANALYSIS.name(), workflowContext, CreateGridSafetyAnalysisStepParameter.OUT
+                        .values());
+        GridSafetyAnalysisDto dto = workflowContext
+                .get(CreateGridSafetyAnalysisStepParameter.OUT.GRID_SAFETY_ANALYSIS.name(), GridSafetyAnalysisDto.class);
 
-        if (timeout != null && timeout > 0) {
-            completableFuture = concurrentUtil.within(completableFuture, Duration.ofMinutes(timeout),
-                    String.format("Grid Safety Analysis for %s on %s timed out after ",
-                            entityAddress, period.toString("yyyy-MM-dd")));
-        }
-
-        completableFuture.whenCompleteAsync((result, throwable) -> {
-            LOGGER.info("Processing Grid Gafety Analysis for {}", result.getValue(IN.CONGESTION_POINT_ENTITY_ADDRESS.name()));
-            WorkflowUtil
-                    .validateContext(DSO_CREATE_GRID_SAFETY_ANALYSIS.name(), result, CreateGridSafetyAnalysisStepParameter.OUT
-                            .values());
-            GridSafetyAnalysisDto dto = result
-                    .get(CreateGridSafetyAnalysisStepParameter.OUT.GRID_SAFETY_ANALYSIS.name(), GridSafetyAnalysisDto.class);
-
-            storeGridSafetyEventManager.fire(new StoreGridSafetyAnalysisEvent(entityAddress, period, dto));
-        }).exceptionally(throwable -> {
-            LOGGER.error(throwable.getMessage());
-            return null;
-        });
+        storeGridSafetyEventManager.fire(new StoreGridSafetyAnalysisEvent(entityAddress, period, dto));
 
         LOGGER.info(LOG_COORDINATOR_FINISHED_HANDLING_EVENT, event);
-    }
-
-    public WorkflowContext callPluggableBusinessComponent(WorkflowContext inContext) {
-        LOGGER.info("Invoke Pluggable Business Component {}", DSO_CREATE_GRID_SAFETY_ANALYSIS.name());
-        return workflowStepExecuter.invoke(DSO_CREATE_GRID_SAFETY_ANALYSIS.name(), inContext);
     }
 
     /**
