@@ -80,9 +80,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
+import javax.ejb.*;
 import javax.inject.Inject;
 
 import org.joda.time.LocalDate;
@@ -94,6 +92,7 @@ import org.slf4j.LoggerFactory;
  * Global BusinessService class to help with methods used in multiple roles.
  */
 @Stateless
+@Lock(LockType.READ)
 public class CorePlanboardBusinessService {
     private static final Logger LOGGER = LoggerFactory.getLogger(CorePlanboardBusinessService.class);
 
