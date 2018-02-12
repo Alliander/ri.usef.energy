@@ -49,6 +49,7 @@ import org.slf4j.LoggerFactory;
  * Processes initial d-prognosis reception.
  */
 @Stateless
+@Asynchronous
 public class PrognosisController extends BaseIncomingMessageController<Prognosis> {
     private static final Logger LOGGER = LoggerFactory.getLogger(PrognosisController.class);
 
