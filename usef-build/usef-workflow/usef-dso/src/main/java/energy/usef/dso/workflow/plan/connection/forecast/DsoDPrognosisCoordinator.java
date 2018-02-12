@@ -26,10 +26,7 @@ import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ejb.Asynchronous;
-import javax.ejb.Lock;
-import javax.ejb.LockType;
-import javax.ejb.Singleton;
+import javax.ejb.*;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import java.util.List;
@@ -41,6 +38,7 @@ import static energy.usef.core.constant.USEFConstants.LOG_COORDINATOR_START_HAND
  * DSO Non Aggreagator Connection Forecast workflow, Plan board sub-flow workflow coordinator.
  */
 @Singleton
+@ConcurrencyManagement(value = ConcurrencyManagementType.BEAN)
 public class DsoDPrognosisCoordinator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DsoDPrognosisCoordinator.class);

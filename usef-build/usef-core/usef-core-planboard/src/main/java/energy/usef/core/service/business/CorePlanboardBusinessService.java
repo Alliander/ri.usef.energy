@@ -92,7 +92,6 @@ import org.slf4j.LoggerFactory;
  * Global BusinessService class to help with methods used in multiple roles.
  */
 @Stateless
-@Lock(LockType.READ)
 public class CorePlanboardBusinessService {
     private static final Logger LOGGER = LoggerFactory.getLogger(CorePlanboardBusinessService.class);
 
