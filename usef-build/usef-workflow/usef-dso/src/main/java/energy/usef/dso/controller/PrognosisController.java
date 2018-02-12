@@ -36,6 +36,9 @@ import energy.usef.core.util.XMLUtil;
 import energy.usef.dso.service.business.DsoPlanboardValidatorService;
 import energy.usef.dso.workflow.plan.connection.forecast.DsoDPrognosisCoordinator;
 
+import javax.ejb.Asynchronous;
+import javax.ejb.Lock;
+import javax.ejb.LockType;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
@@ -101,7 +104,7 @@ public class PrognosisController extends BaseIncomingMessageController<Prognosis
      * @param prognosis
      * @param errorMessage
      */
-    public void sendPrognosisResponse(Prognosis prognosis, String errorMessage) {
+    private void sendPrognosisResponse(Prognosis prognosis, String errorMessage) {
         PrognosisResponse prognosisResponse = createPrognosisResponse(prognosis.getCongestionPoint(), prognosis
                 .getMessageMetadata().getConversationID(), prognosis.getMessageMetadata().getSenderDomain(), errorMessage);
         prognosisResponse.setPrognosisSequence(prognosis.getSequence());
