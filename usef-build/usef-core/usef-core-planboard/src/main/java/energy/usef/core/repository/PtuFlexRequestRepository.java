@@ -72,6 +72,28 @@ public class PtuFlexRequestRepository extends BaseRepository<PtuFlexRequest> {
      * Finds the {@link PtuFlexRequest} with the given sequence number for a given participant. The size of the resulting list
      * should match the number of PTUs for the period of those PtuFlexRequest.
      *
+     * @param flexRequestSequenceNumber     {@link Long} sequence number.
+     * @return a {@link List} of {@link PtuFlexRequest}.
+     */
+    public List<PtuFlexRequest> findPtuFlexRequestWithSequence(Long flexRequestSequenceNumber) {
+        if (flexRequestSequenceNumber == null) {
+            return new ArrayList<>();
+        }
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT pfr ");
+        sql.append("FROM PtuFlexRequest pfr ");
+        sql.append("WHERE pfr.sequence = :sequence ");
+        sql.append("ORDER BY pfr.ptuContainer.ptuIndex ");
+
+        return getEntityManager().createQuery(sql.toString(), PtuFlexRequest.class)
+                .setParameter("sequence", flexRequestSequenceNumber)
+                .getResultList();
+    }
+
+    /**
+     * Finds the {@link PtuFlexRequest} with the given sequence number for a given participant. The size of the resulting list
+     * should match the number of PTUs for the period of those PtuFlexRequest.
+     *
      * @param connectionGroupUsefIdentifier {@link String} usef identifier of the connection group.
      * @param flexRequestSequenceNumber     {@link Long} sequence number.
      * @param participantDomain             {@link String} participant domain name.

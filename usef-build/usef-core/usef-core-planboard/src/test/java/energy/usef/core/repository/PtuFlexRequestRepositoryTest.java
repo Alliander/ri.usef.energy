@@ -119,6 +119,17 @@ public class PtuFlexRequestRepositoryTest {
     }
 
     @Test
+    public void testFindPtuFlexRequestBySequence() {
+        final String connectionGroupUsefIdentifier = "ea1.1992-01.com.example:gridpoint.4f76ff19-a53b-49f5-84e6";
+        final Long sequenceNumber = 10002l;
+        final String participantDomain = "abc4.com";
+        List<PtuFlexRequest> ptuFlexRequests = repository.findPtuFlexRequestWithSequence(sequenceNumber);
+        Assert.assertNotNull(ptuFlexRequests);
+        Assert.assertEquals(3, ptuFlexRequests.size());
+    }
+
+
+    @Test
     public void testCleanup() {
         Assert.assertEquals("Expected no deleted objects", 0, repository.cleanup(new LocalDate()));
         Assert.assertEquals("Expected deleted objects", 1, repository.cleanup(new LocalDate("1999-12-30")));
