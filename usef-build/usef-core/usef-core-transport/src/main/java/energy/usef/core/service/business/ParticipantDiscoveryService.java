@@ -387,6 +387,6 @@ public class ParticipantDiscoveryService {
     }
 
     private boolean useParticipantService() {
-        return config.getProperty(ConfigParam.PARTICIPANT_SERVICE_URL) != null;
+        return config.getBooleanProperty(ConfigParam.USE_PARTICIPANT_SERVICE);
     }
 }

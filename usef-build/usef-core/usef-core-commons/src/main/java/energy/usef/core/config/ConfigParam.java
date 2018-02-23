@@ -59,6 +59,7 @@ public enum ConfigParam {
     KEYSTORE_PRIVATE_KEY_PASSWORD(String.class),
 
     PARTICIPANT_DNS_INFO_FILENAME(String.class),
+    USE_PARTICIPANT_SERVICE(Boolean.class),
     PARTICIPANT_SERVICE_URL(String.class),
     SENDER_ALLOW_LIST_FORCED(String.class),
     SENDER_ALLOW_LIST_FILENAME(String.class),
