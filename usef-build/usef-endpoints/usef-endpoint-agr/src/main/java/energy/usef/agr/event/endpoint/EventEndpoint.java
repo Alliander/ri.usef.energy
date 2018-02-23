@@ -23,7 +23,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 
-import energy.usef.agr.workflow.plan.connection.profile.AgrUpdateElementDataStoreEvent;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
@@ -128,10 +127,6 @@ public class EventEndpoint {
     @Inject
     private Event<CreateConnectionProfileEvent> createConnectionProfileEventManager;
 
-    @Inject
-    private Event<AgrUpdateElementDataStoreEvent> agrUpdateElementDataStoreEventManager;
-
-
     /**
      * Turn on or off the scheduler. The values true/false, 0/1 or on/off can be used.
      *
@@ -173,15 +168,6 @@ public class EventEndpoint {
     public Response sendCommonReferenceQueryEvent() {
         LOGGER.info("ConnectionForecastEvent fired.");
         commonReferenceQueryEventManager.fire(new CommonReferenceQueryEvent());
-        return Response.status(Response.Status.OK).build();
-    }
-
-
-    @GET
-    @Path("/AgrUpdateElementDataStoreEvent/{period}")
-    public Response initDay(@PathParam("period") String period) {
-        LOGGER.info("AgrUpdateElementDataStoreEvent fired.");
-        agrUpdateElementDataStoreEventManager.fire(new AgrUpdateElementDataStoreEvent(new LocalDate(period)));
         return Response.status(Response.Status.OK).build();
     }
 
