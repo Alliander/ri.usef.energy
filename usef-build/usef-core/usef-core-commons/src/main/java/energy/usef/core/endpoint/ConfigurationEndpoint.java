@@ -45,10 +45,13 @@ public class ConfigurationEndpoint {
         LOGGER.info("Received request to get Configuration");
         try {
             return Response.ok(JsonUtil.createJsonText(getWhitelistedProperties()), MediaType.APPLICATION_JSON_TYPE)
+                    .header("Access-Control-Allow-Origin", "*")
                     .build();
         } catch (IOException e) {
             LOGGER.error("{}", e);
-            return Response.serverError().entity(JsonUtil.exceptionBody(e)).build();
+            return Response.serverError().entity(JsonUtil.exceptionBody(e))
+                    .header("Access-Control-Allow-Origin", "*")
+                    .build();
         } finally {
             LOGGER.info("Processed request to get all Configuration");
         }
