@@ -16,8 +16,9 @@
 
 package energy.usef.agr.dto.device.capability;
 
-import org.codehaus.jackson.annotate.JsonSubTypes;
-import org.codehaus.jackson.annotate.JsonTypeInfo;
+
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 /**
  * JSON class representing the capability of a UDI device.

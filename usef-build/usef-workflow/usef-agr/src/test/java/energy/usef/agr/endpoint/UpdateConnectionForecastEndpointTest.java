@@ -16,6 +16,7 @@
 
 package energy.usef.agr.endpoint;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import energy.usef.agr.endpoint.dto.ConnectionRestDto;
 import energy.usef.agr.service.business.AgrPlanboardBusinessService;
 import energy.usef.agr.workflow.plan.updateforecast.UpdateConnectionForecastEvent;
@@ -28,7 +29,6 @@ import javax.enterprise.event.Event;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.MediaType;
 
-import org.codehaus.jackson.map.ObjectMapper;
 import org.jboss.resteasy.mock.MockHttpRequest;
 import org.jboss.resteasy.mock.MockHttpResponse;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;

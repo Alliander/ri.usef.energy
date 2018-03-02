@@ -8,7 +8,7 @@
         <dependencies>
             <module name="org.dom4j"/>
             <module name="org.joda.time"/>
-            <module name="org.jboss.resteasy.resteasy-jackson-provider"/>
+            <module name="org.jboss.resteasy.resteasy-jackson2-provider"/>
         </dependencies>
     </deployment>
 </jboss-deployment-structure>

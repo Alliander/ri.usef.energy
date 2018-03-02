@@ -6,13 +6,13 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import energy.usef.core.config.ConfigParam;
 import energy.usef.core.config.DefaultConfig;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
 import javax.ws.rs.core.Response;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
