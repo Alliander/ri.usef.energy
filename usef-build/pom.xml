@@ -25,7 +25,7 @@
         <guava.version>23.5-jre</guava.version>
         <httpclient.version>4.5.3</httpclient.version>
         <httpcore.version>4.4.8</httpcore.version>
-        <jackson.version>2.9.2</jackson.version>
+        <jackson.version>2.7.4</jackson.version><!--version is related to provided resteasy/wildfy dependency-->
         <janino.version>3.0.7</janino.version>
         <javaee-api.version>7.0</javaee-api.version><!--TODO: update me-->
         <javassist.version>3.22.0-GA</javassist.version>
@@ -133,6 +133,11 @@
                 <version>${jackson.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.fasterxml.jackson.datatype</groupId>
+                <artifactId>jackson-datatype-joda</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.github.fge</groupId>
                 <artifactId>json-schema-core</artifactId>
                 <version>${json-schema-core.version}</version>
@@ -202,7 +207,7 @@
             </dependency>
             <dependency>
                 <groupId>org.jboss.resteasy</groupId>
-                <artifactId>resteasy-jackson-provider</artifactId>
+                <artifactId>resteasy-jackson2-provider</artifactId>
                 <version>${resteasy.version}</version>
                 <scope>provided</scope>
             </dependency>
