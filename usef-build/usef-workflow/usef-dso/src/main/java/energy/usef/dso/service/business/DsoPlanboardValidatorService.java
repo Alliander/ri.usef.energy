@@ -31,16 +31,21 @@ import energy.usef.core.repository.PlanboardMessageRepository;
 import energy.usef.core.repository.PtuFlexRequestRepository;
 import energy.usef.core.transformer.PtuListConverter;
 import energy.usef.core.util.DateTimeUtil;
+import energy.usef.core.util.PtuUtil;
 import energy.usef.dso.exception.DsoBusinessError;
 import energy.usef.dso.model.Aggregator;
 import energy.usef.dso.repository.AggregatorOnConnectionGroupStateRepository;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
+import static energy.usef.dso.exception.DsoBusinessError.FLEX_OFFER_EPIRES_TOO_LATE;
 import static energy.usef.dso.exception.DsoBusinessError.FLEX_OFFER_NOT_AS_REQUESTED;
 
 /**
@@ -158,7 +163,7 @@ public class DsoPlanboardValidatorService {
         }
     }
 
-    public void validateFlexOfferMatchesRequest(FlexOffer flexOffer) throws BusinessValidationException{
+    public void validateFlexOfferMatchesRequest(FlexOffer flexOffer) throws BusinessValidationException {
         String congestionPoint = flexOffer.getCongestionPoint();
         Long sequenceNumber = flexOffer.getFlexRequestSequence();
         String senderDomain = flexOffer.getMessageMetadata().getSenderDomain();
@@ -182,4 +187,39 @@ public class DsoPlanboardValidatorService {
             throw new BusinessValidationException(FLEX_OFFER_NOT_AS_REQUESTED);
         }
     }
+
+    /**
+     * Check if the expirationDateTime of a {@link FlexOffer} is before the start of the first offered PTU.
+     *
+     * @param flexOffer The {@link FlexOffer} to condider
+     */
+
+    public void validateFlexOfferExpirationDateTime(FlexOffer flexOffer) throws BusinessValidationException{
+        String congestionPoint = flexOffer.getCongestionPoint();
+        Long sequenceNumber = flexOffer.getFlexRequestSequence();
+        String senderDomain = flexOffer.getMessageMetadata().getSenderDomain();
+
+        // Get only the PTU's where flexibility is requested
+        List<Integer> requestedPtus = ptuFlexRequestRepository.findPtuFlexRequestWithSequence(congestionPoint, sequenceNumber, senderDomain)
+                .stream().filter(o-> o.getDisposition() == DispositionAvailableRequested.REQUESTED).map(o -> o.getPtuContainer().getPtuIndex()).collect(Collectors.toList());
+
+        List<PTU> flexOfferPtus = PtuListConverter.normalize(flexOffer.getPTU());
+
+        Optional<Integer> firstPtu =  flexOfferPtus.stream()
+                .filter(o -> requestedPtus.contains(o.getStart().intValue()))
+                .sorted((o1, o2) -> o1.getStart().compareTo(o2.getStart()))
+                .map(o -> o.getStart().intValue())
+                .findFirst();
+
+        if (firstPtu.isPresent()) {
+            LocalDateTime firstPtuStart = PtuUtil
+                    .getPtuStartDateTime(flexOffer.getPeriod(), firstPtu.get(), config.getIntegerProperty(ConfigParam.PTU_DURATION));
+
+            if (flexOffer.getExpirationDateTime().isBefore(firstPtuStart)) {
+                throw new BusinessValidationException(FLEX_OFFER_EPIRES_TOO_LATE);
+            }
+        }
+    }
+
+
 }

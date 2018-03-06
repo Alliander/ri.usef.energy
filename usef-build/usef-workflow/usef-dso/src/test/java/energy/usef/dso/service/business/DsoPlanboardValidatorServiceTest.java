@@ -36,12 +36,14 @@ import energy.usef.dso.model.Aggregator;
 import energy.usef.dso.repository.AggregatorOnConnectionGroupStateRepository;
 import org.apache.commons.io.IOUtils;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
@@ -52,6 +54,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -237,5 +240,121 @@ public class DsoPlanboardValidatorServiceTest {
             list.add(ptuFlexRequest);
         }
         return list;
+    }
+    @Test
+    public void testGetFlexOfferWithCorrectExpirationDateTime() throws BusinessValidationException {
+        LocalDate period = LocalDate.now();
+        LocalDateTime expirationDateTime = LocalDateTime.now().plusDays(2);
+        String senderDomain = "SenderDomain";
+        String congestionPoint = "CongestionPoint";
+
+        MessageMetadata messageMetadata = new MessageMetadata();
+        messageMetadata.setSenderDomain(senderDomain);
+
+        FlexOffer flexOffer = new FlexOffer();
+        flexOffer.setPeriod(period);
+        flexOffer.setCongestionPoint("CongestionPoint");
+        flexOffer.setFlexRequestSequence(1L);
+        flexOffer.setMessageMetadata(messageMetadata);
+        flexOffer.setExpirationDateTime(expirationDateTime);
+
+        flexOffer.getPTU().add(createPTU(12L, 2L, 100L, 20L));
+        flexOffer.getPTU().add(createPTU(24L, 1L, 50L, 10L));
+
+        List<PtuFlexRequest> requestedPtus = Arrays.asList(
+                createPtuFlexRequest(period, 11),
+                createPtuFlexRequest(period, 12),
+                createPtuFlexRequest(period, 13),
+                createPtuFlexRequest(period, 24));
+
+        Mockito.when(ptuFlexRequestRepository.findPtuFlexRequestWithSequence(congestionPoint, 1L, senderDomain)).thenReturn(requestedPtus);
+
+        service.validateFlexOfferExpirationDateTime(flexOffer);
+    }
+
+    @Test (expected = BusinessValidationException.class)
+    public void testGetFlexOfferWithIncorrectExpirationDateTime() throws BusinessValidationException {
+        LocalDate period = LocalDate.now();
+        LocalDateTime expirationDateTime = LocalDateTime.now().minusDays(2);
+        String senderDomain = "SenderDomain";
+        String congestionPoint = "CongestionPoint";
+
+        MessageMetadata messageMetadata = new MessageMetadata();
+        messageMetadata.setSenderDomain(senderDomain);
+
+        FlexOffer flexOffer = new FlexOffer();
+        flexOffer.setPeriod(period);
+        flexOffer.setCongestionPoint("CongestionPoint");
+        flexOffer.setFlexRequestSequence(1L);
+        flexOffer.setMessageMetadata(messageMetadata);
+        flexOffer.setExpirationDateTime(expirationDateTime);
+
+        flexOffer.getPTU().add(createPTU(12L, 2L, 100L, 20L));
+        flexOffer.getPTU().add(createPTU(24L, 1L, 50L, 10L));
+
+        List<PtuFlexRequest> requestedPtus = Arrays.asList(
+                createPtuFlexRequest(period, 11),
+                createPtuFlexRequest(period, 12),
+                createPtuFlexRequest(period, 13),
+                createPtuFlexRequest(period, 24));
+
+        Mockito.when(ptuFlexRequestRepository.findPtuFlexRequestWithSequence(congestionPoint, 1L, senderDomain))
+                .thenReturn(requestedPtus);
+
+        service.validateFlexOfferExpirationDateTime(flexOffer);
+    }
+
+    @Test
+    public void testCorrectEmptyFlexOffer() throws BusinessValidationException {
+        LocalDate period = LocalDate.now();
+        LocalDateTime expirationDateTime = LocalDateTime.now().minusDays(2);
+        String senderDomain = "SenderDomain";
+        String congestionPoint = "CongestionPoint";
+
+        MessageMetadata messageMetadata = new MessageMetadata();
+        messageMetadata.setSenderDomain(senderDomain);
+
+        FlexOffer flexOffer = new FlexOffer();
+        flexOffer.setPeriod(period);
+        flexOffer.setCongestionPoint("CongestionPoint");
+        flexOffer.setFlexRequestSequence(1L);
+        flexOffer.setMessageMetadata(messageMetadata);
+        flexOffer.setExpirationDateTime(expirationDateTime);
+
+        List<PtuFlexRequest> requestedPtus = Arrays.asList(
+                createPtuFlexRequest(period, 11),
+                createPtuFlexRequest(period, 12),
+                createPtuFlexRequest(period, 13),
+                createPtuFlexRequest(period, 24));
+
+        Mockito.when(ptuFlexRequestRepository.findPtuFlexRequestWithSequence(congestionPoint, 1L, senderDomain)).thenReturn(requestedPtus);
+
+        service.validateFlexOfferExpirationDateTime(flexOffer);
+
+        Assert.assertEquals(expirationDateTime, flexOffer.getExpirationDateTime());
+    }
+    private PtuFlexRequest createPtuFlexRequest(LocalDate period, Integer ptuIndex) {
+        PtuFlexRequest ptuFlexRequest = new PtuFlexRequest();
+        ptuFlexRequest.setPtuContainer(createPtuContainer(period, ptuIndex));
+        ptuFlexRequest.setDisposition(DispositionAvailableRequested.REQUESTED);
+
+        return ptuFlexRequest;
+    }
+
+    private PtuContainer createPtuContainer(LocalDate ptuDate, Integer ptuIndex) {
+        PtuContainer ptuContainer = new PtuContainer();
+        ptuContainer.setPtuDate(ptuDate);
+        ptuContainer.setPtuIndex(ptuIndex);
+
+        return ptuContainer;
+    }
+
+    private PTU createPTU(long start, long duration, long power, long price) {
+        PTU ptu = new PTU();
+        ptu.setStart(BigInteger.valueOf(start));
+        ptu.setDuration(BigInteger.valueOf(duration));
+        ptu.setPower(BigInteger.valueOf(power));
+        ptu.setPrice(BigDecimal.valueOf(price));
+        return ptu;
     }
 }

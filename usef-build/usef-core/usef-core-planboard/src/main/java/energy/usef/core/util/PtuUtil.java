@@ -44,7 +44,7 @@ public class PtuUtil {
      * 
      * The number of minutes per day is divided by the PTU duration. The outcome is ceiled. So, 96.2 PTU's is ceiled to 97 PTU's.
      * 
-     * @param dateTime the datetime which is set. When a default constructor is used to create a DateTime instance, the default
+     * @param date the date which is set. When a default constructor is used to create a DateTime instance, the default
      *            timezone is set (which is system default).
      * @param ptuDuration the duration of a ptu (in minutes)
      * @return the number of ptu's for a specific day.
@@ -57,6 +57,18 @@ public class PtuUtil {
         }
     }
 
+    /**
+     * Get the starting date time of for the given perion, ptuIndex and ptuDuration
+
+     * @param date the date which is set. When a default constructor is used to create a DateTime instance, the default
+     *            timezone is set (which is system default).
+     * @param ptuIndex ptu index
+     * @param ptuDuration the duration of a ptu (in minutes)
+     * @return the LocalDateTime the ptu start
+     */
+    public static LocalDateTime getPtuStartDateTime(LocalDate date, int ptuIndex, int ptuDuration) {
+        return date.toLocalDateTime(LocalTime.MIDNIGHT).plusMinutes((ptuIndex - 1) * ptuDuration);
+    }
     /**
      * Gets PTU index corresponding to a given timestamp.
      * 

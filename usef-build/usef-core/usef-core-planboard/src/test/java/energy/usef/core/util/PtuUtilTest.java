@@ -156,4 +156,14 @@ public class PtuUtilTest {
         assertEquals(191, PtuUtil.numberOfPtusBetween(startDate, endDate, 2, 1, 15).intValue());
         assertEquals(193, PtuUtil.numberOfPtusBetween(startDate, endDate, 1, 2, 15).intValue());
     }
+
+    @Test
+    public void testGetPtuStartDateTime() {
+        LocalDate localDate = new LocalDate().withYear(2015).withMonthOfYear(10).withDayOfMonth(25);
+        LocalDateTime localDateTime = new LocalDateTime().withYear(2015).withMonthOfYear(10).withDayOfMonth(25).withHourOfDay(0)
+                .withMinuteOfHour(45).withSecondOfMinute(0).withMillisOfSecond(0);
+
+        assertEquals(localDateTime, PtuUtil.getPtuStartDateTime(localDate, 4,  PTU_DURATION));
+    }
+
 }
