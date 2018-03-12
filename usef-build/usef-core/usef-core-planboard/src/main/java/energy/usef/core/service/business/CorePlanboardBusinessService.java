@@ -1294,6 +1294,15 @@ public class CorePlanboardBusinessService {
     }
 
     /**
+     * Update given congestion point.
+     *
+     * @param congestionPoint the congestionPoint to update
+     */
+    public void updateCongestionPoint(CongestionPointConnectionGroup congestionPoint) {
+        congestionPointConnectionGroupRepository.persist(congestionPoint);
+    }
+
+    /**
      * Finds {@link CongestionPointConnectionGroup} matching the given congestionPoint entity address.
      *
      * @param congestionPoint the congestion point entity address
