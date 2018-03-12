@@ -1299,7 +1299,7 @@ public class CorePlanboardBusinessService {
      * @param congestionPoint the congestionPoint to update
      */
     public void updateCongestionPoint(CongestionPointConnectionGroup congestionPoint) {
-        congestionPointConnectionGroupRepository.persist(congestionPoint);
+        congestionPointConnectionGroupRepository.update(congestionPoint);
     }
 
     /**
