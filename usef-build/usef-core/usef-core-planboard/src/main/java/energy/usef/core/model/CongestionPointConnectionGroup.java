@@ -42,8 +42,27 @@ public class CongestionPointConnectionGroup extends ConnectionGroup {
         super(usefIdentifer);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public CongestionPointConnectionGroup(String usefIdentifer, Boolean dayAheadAutoOrder, Boolean intraDayAutoOrder, Integer dayAheadPercentage) {
+        super(usefIdentifer);
+        this.dayAheadAutoOrder = dayAheadAutoOrder;
+        this.intraDayAutoOrder = intraDayAutoOrder;
+        this.dayAheadPercentage = dayAheadPercentage;
+    }
+
     @Column(name = "DSO_DOMAIN")
     private String dsoDomain;
+
+    @Column(name = "DAY_AHEAD_AUTO_ORDER")
+    private Boolean dayAheadAutoOrder;
+
+    @Column(name = "INTRA_DAY_AUTO_ORDER")
+    private Boolean intraDayAutoOrder;
+
+    @Column(name = "DAY_AHEAD_PERCENTAGE")
+    private Integer dayAheadPercentage;
 
     public String getDsoDomain() {
         return dsoDomain;
