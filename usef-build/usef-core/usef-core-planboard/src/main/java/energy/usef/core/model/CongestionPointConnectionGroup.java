@@ -72,6 +72,30 @@ public class CongestionPointConnectionGroup extends ConnectionGroup {
         this.dsoDomain = dsoDomain;
     }
 
+    public Boolean getDayAheadAutoOrder() {
+        return dayAheadAutoOrder;
+    }
+
+    public void setDayAheadAutoOrder(Boolean dayAheadAutoOrder) {
+        this.dayAheadAutoOrder = dayAheadAutoOrder;
+    }
+
+    public Boolean getIntraDayAutoOrder() {
+        return intraDayAutoOrder;
+    }
+
+    public void setIntraDayAutoOrder(Boolean intraDayAutoOrder) {
+        this.intraDayAutoOrder = intraDayAutoOrder;
+    }
+
+    public Integer getDayAheadPercentage() {
+        return dayAheadPercentage;
+    }
+
+    public void setDayAheadPercentage(Integer dayAheadPercentage) {
+        this.dayAheadPercentage = dayAheadPercentage;
+    }
+
     @Override
     public String toString() {
         return "CongestionPointConnectionGroup" + "[" +
