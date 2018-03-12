@@ -1274,14 +1274,23 @@ public class CorePlanboardBusinessService {
     }
 
     /**
+     * Finds active congestion points.
+     *
+     * @param period period
+     * @return active congestion points
+     */
+    public List<CongestionPointConnectionGroup> findActiveCongestionPoints(LocalDate period) {
+        return congestionPointConnectionGroupRepository.findActiveCongestionPointConnectionGroup(period);
+    }
+
+    /**
      * Finds active congestion point address list.
      *
      * @param period period
      * @return active congestion point address list
      */
     public List<String> findActiveCongestionPointAddresses(LocalDate period) {
-        return congestionPointConnectionGroupRepository.findActiveCongestionPointConnectionGroup(period).stream()
-                .map(ConnectionGroup::getUsefIdentifier).collect(Collectors.toList());
+        return findActiveCongestionPoints(period).stream().map(ConnectionGroup::getUsefIdentifier).collect(Collectors.toList());
     }
 
     /**
