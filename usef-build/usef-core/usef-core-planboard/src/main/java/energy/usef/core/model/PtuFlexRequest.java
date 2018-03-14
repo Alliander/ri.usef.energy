@@ -16,7 +16,10 @@
 
 package energy.usef.core.model;
 
+import org.joda.time.LocalDateTime;
+
 import java.math.BigInteger;
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -24,6 +27,8 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 /**
  * {@link PtuFlexRequest} entity class represents the connection on which an aggregator can have a customer.
@@ -33,6 +38,14 @@ import javax.persistence.Table;
 @SequenceGenerator(name = "SEQUENCE_CONNECTION", sequenceName = "SEQUENCE_CONNECTION", initialValue = 1,
         allocationSize = 1)
 public class PtuFlexRequest extends Exchange {
+
+    @Column(name = "CREATION_DATETIME")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date creationDateTime;
+
+    @Column(name = "EXPIRATION_DATE")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date expirationDate;
 
     @Column(name = "POWER", precision=18, scale=0, nullable = false)
     private BigInteger power;
@@ -49,6 +62,36 @@ public class PtuFlexRequest extends Exchange {
      */
     public PtuFlexRequest() {
         super();
+    }
+
+    public LocalDateTime getCreationDateTime() {
+        if (creationDateTime == null) {
+            return null;
+        }
+        return LocalDateTime.fromDateFields(creationDateTime);
+    }
+
+    public void setCreationDateTime(LocalDateTime creationDateTime) {
+        if (creationDateTime == null) {
+            this.creationDateTime = null;
+        } else {
+            this.creationDateTime = creationDateTime.toDateTime().toDate();
+        }
+    }
+
+    public LocalDateTime getExpirationDate() {
+        if (expirationDate == null) {
+            return null;
+        }
+        return LocalDateTime.fromDateFields(expirationDate);
+    }
+
+    public void setExpirationDate(LocalDateTime expirationDate) {
+        if (expirationDate == null) {
+            this.expirationDate = null;
+        } else {
+            this.expirationDate = expirationDate.toDateTime().toDate();
+        }
     }
 
     public BigInteger getPower() {

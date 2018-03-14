@@ -16,29 +16,37 @@
 
 package energy.usef.core.model;
 
+import org.joda.time.LocalDateTime;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 /**
  * Entity class {@link PtuFlexOffer}: This class is a representation of a FlexOffer.
- *
  */
 @Entity
 @Table(name = "PTU_FLEXOFFER")
 public class PtuFlexOffer extends Exchange {
 
-    @Column(name = "POWER", precision=18, scale=0)
+    @Column(name = "POWER", precision = 18, scale = 0)
     private BigInteger power;
 
-    @Column(name = "PRICE", precision=18, scale=4)
+    @Column(name = "PRICE", precision = 18, scale = 4)
     private BigDecimal price;
 
     @Column(name = "FLEXREQUEST_SEQUENCE", nullable = false)
     private Long flexRequestSequence;
+
+    @Column(name = "EXPIRATION_DATE")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date expirationDate;
 
     public BigInteger getPower() {
         return power;
@@ -62,6 +70,21 @@ public class PtuFlexOffer extends Exchange {
 
     public void setFlexRequestSequence(Long flexRequestSequence) {
         this.flexRequestSequence = flexRequestSequence;
+    }
+
+    public LocalDateTime getExpirationDate() {
+        if (expirationDate == null) {
+            return null;
+        }
+        return LocalDateTime.fromDateFields(expirationDate);
+    }
+
+    public void setExpirationDate(LocalDateTime expirationDate) {
+        if (expirationDate == null) {
+            this.expirationDate = null;
+        } else {
+            this.expirationDate = expirationDate.toDateTime().toDate();
+        }
     }
 
     @Override

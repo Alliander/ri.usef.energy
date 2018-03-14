@@ -70,6 +70,7 @@ public class FlexRequestTransformer {
         flexRequestDto.setPeriod(firstPtuFlexRequest.getPtuContainer().getPtuDate());
         flexRequestDto.setSequenceNumber(firstPtuFlexRequest.getSequence());
         flexRequestDto.setPrognosisSequenceNumber(firstPtuFlexRequest.getPrognosisSequence());
+        flexRequestDto.setExpirationDateTime(firstPtuFlexRequest.getExpirationDate());
         ptuFlexRequests.stream().forEach(ptuFlexRequest -> flexRequestDto.getPtus().add(transform(ptuFlexRequest)));
         return flexRequestDto;
     }

@@ -147,6 +147,7 @@ public class CorePlanboardBusinessService {
                 flexRequestMessage.getExpirationDateTime());
         planboardMessageRepository.persist(planboardMessage);
 
+        LocalDateTime now = LocalDateTime.now();
         Map<Integer, PtuContainer> ptuContainers = ptuContainerRepository.findPtuContainersMap(period);
         for (PTU ptu : ptus) {
             PtuContainer ptuContainer = ptuContainers.get(ptu.getStart().intValue());
@@ -159,6 +160,10 @@ public class CorePlanboardBusinessService {
             ptuFlexRequest.setPower(ptu.getPower() == null ? BigInteger.ZERO : ptu.getPower());
             ptuFlexRequest.setSequence(flexRequestMessage.getSequence());
             ptuFlexRequest.setPrognosisSequence(flexRequestMessage.getPrognosisSequence());
+            ptuFlexRequest.setCreationDateTime(now);
+            // TODO: What is an acceptable value?
+            ptuFlexRequest.setExpirationDate(now.plusDays(1));
+
             // persist the flex request
             ptuFlexRequestRepository.persist(ptuFlexRequest);
         }
@@ -201,6 +206,7 @@ public class CorePlanboardBusinessService {
             flexOffer.setFlexRequestSequence(flexOfferRequest.getFlexRequestSequence());
             flexOffer.setPower(ptu.getPower());
             flexOffer.setPrice(ptu.getPrice());
+            flexOffer.setExpirationDate(flexOfferRequest.getExpirationDateTime());
 
             ptuFlexOfferRepository.persist(flexOffer);
             offers.add(flexOffer);
