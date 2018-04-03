@@ -88,14 +88,18 @@ public class AgrConnectionForecastPlanboardCoordinator {
         for (int dayShift = 1; dayShift <= interval; dayShift++) {
             LocalDate forecastDay = DateTimeUtil.getCurrentDate().plusDays(dayShift);
 
-            List<ConnectionPortfolioDto> connectionPortfolioDTOs = agrPortfolioBusinessService
-                    .findConnectionPortfolioDto(forecastDay);
-            List<ConnectionPortfolioDto> resultConnectionPortfolioDTOs = invokeCreateNDayAheadForecastPbc(forecastDay,
-                    connectionPortfolioDTOs);
-            LOGGER.debug("Saving the forecast request results");
-            agrPortfolioBusinessService.createConnectionForecasts(forecastDay, resultConnectionPortfolioDTOs);
-            // Re-optimize Connection Portfolio
-            reOptimizePortfolioEventManager.fire(new ReOptimizePortfolioEvent(forecastDay));
+            try {
+                List<ConnectionPortfolioDto> connectionPortfolioDTOs = agrPortfolioBusinessService
+                        .findConnectionPortfolioDto(forecastDay);
+                List<ConnectionPortfolioDto> resultConnectionPortfolioDTOs = invokeCreateNDayAheadForecastPbc(forecastDay,
+                        connectionPortfolioDTOs);
+                LOGGER.debug("Saving the forecast request results");
+                agrPortfolioBusinessService.createConnectionForecasts(forecastDay, resultConnectionPortfolioDTOs);
+                // Re-optimize Connection Portfolio
+                reOptimizePortfolioEventManager.fire(new ReOptimizePortfolioEvent(forecastDay));
+            } catch (Exception e) {
+                LOGGER.error("Exception occured while handling create connection forecast event.", e);
+            }
         }
         LOGGER.info(LOG_COORDINATOR_FINISHED_HANDLING_EVENT, event);
     }
