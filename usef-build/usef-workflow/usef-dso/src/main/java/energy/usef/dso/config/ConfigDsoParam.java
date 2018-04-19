@@ -40,7 +40,8 @@ public enum ConfigDsoParam {
     DSO_OPERATE_INTERVAL_IN_SECONDS(Integer.class),
     DSO_OPERATE_INITIAL_DELAY_IN_SECONDS(Integer.class),
     DSO_INITIATE_COLLECT_ORANGE_REGIME_DATA_DAY_OF_MONTH(Integer.class),
-    DSO_INITIATE_COLLECT_ORANGE_REGIME_DATA_TIME(String.class);
+    DSO_INITIATE_COLLECT_ORANGE_REGIME_DATA_TIME(String.class),
+    DSO_PROGNOSIS_TOOL_URL(String.class);
 
     private Class<?> propertyClass;
 
