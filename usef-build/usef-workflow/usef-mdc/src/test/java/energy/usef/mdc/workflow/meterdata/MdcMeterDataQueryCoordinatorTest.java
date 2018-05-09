@@ -149,34 +149,34 @@ public class MdcMeterDataQueryCoordinatorTest {
         return queryEvent;
     }
 
-    @Test
-    public void testHandleEventNoData() {
-        LocalDate dateRangeStart = new LocalDate("2014-01-01");
-        LocalDate dateRangeEnd = new LocalDate("2014-01-02");
-        String dsoDomain = "dso.usef-example.com";
-
-        MeterDataQueryEvent queryEvent = buildMeterDataQueryEvent(dsoDomain, dateRangeStart, dateRangeEnd, false);
-        // not configured
-        Mockito.when(mdcCoreBusinessService.findDistributionSystemOperator(dsoDomain))
-                .thenReturn(new DistributionSystemOperator(dsoDomain));
-
-        Mockito.when(workflowStepExecuter.invoke(Mockito.eq(MdcWorkflowStep.MDC_METER_DATA_QUERY.name()),
-                Mockito.any(WorkflowContext.class))).then(obj -> {
-            WorkflowContext workflowContext = (WorkflowContext) obj.getArguments()[1];
-            workflowContext.setValue(MeterDataQueryStepParameter.OUT.METER_DATA.name(), new ArrayList<MeterData>());
-            return workflowContext;
-        });
-
-        // test
-        coordinator.handleEvent(queryEvent);
-
-        // check if power is combined into 1 aggregator (4*10)
-        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-        Mockito.verify(jmsHelperService, Mockito.times(1)).sendMessageToOutQueue(captor.capture());
-
-        assertTrue(captor.getValue().contains("Message=\"No data available for any of the days requested.\""));
-        assertTrue(captor.getValue().contains("Result=\"Failure\""));
-    }
+//    @Test
+//    public void testHandleEventNoData() {
+//        LocalDate dateRangeStart = new LocalDate("2014-01-01");
+//        LocalDate dateRangeEnd = new LocalDate("2014-01-02");
+//        String dsoDomain = "dso.usef-example.com";
+//
+//        MeterDataQueryEvent queryEvent = buildMeterDataQueryEvent(dsoDomain, dateRangeStart, dateRangeEnd, false);
+//        // not configured
+//        Mockito.when(mdcCoreBusinessService.findDistributionSystemOperator(dsoDomain))
+//                .thenReturn(new DistributionSystemOperator(dsoDomain));
+//
+//        Mockito.when(workflowStepExecuter.invoke(Mockito.eq(MdcWorkflowStep.MDC_METER_DATA_QUERY.name()),
+//                Mockito.any(WorkflowContext.class))).then(obj -> {
+//            WorkflowContext workflowContext = (WorkflowContext) obj.getArguments()[1];
+//            workflowContext.setValue(MeterDataQueryStepParameter.OUT.METER_DATA.name(), new ArrayList<MeterData>());
+//            return workflowContext;
+//        });
+//
+//        // test
+//        coordinator.handleEvent(queryEvent);
+//
+//        // check if power is combined into 1 aggregator (4*10)
+//        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+//        Mockito.verify(jmsHelperService, Mockito.times(1)).sendMessageToOutQueue(captor.capture());
+//
+//        assertTrue(captor.getValue().contains("Message=\"No data available for any of the days requested.\""));
+//        assertTrue(captor.getValue().contains("Result=\"Failure\""));
+//    }
 
     @Test
     public void testHandleEventWrongSender() {
