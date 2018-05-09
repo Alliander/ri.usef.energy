@@ -160,15 +160,17 @@ public class MdcMeterDataQueryCoordinator {
             WorkflowUtil.validateContext(MdcWorkflowStep.MDC_METER_DATA_QUERY.name(), context,
                     MeterDataQueryStepParameter.OUT.values());
             List<MeterDataDto> meterDataDtos = context.get(MeterDataQueryStepParameter.OUT.METER_DATA.name(), List.class);
+            LOGGER.info("First power from meterdataDtos: " + meterDataDtos.get(0).getConnectionMeterDataDtos().get(0).getPtuMeterDataDtos().get(0).getPower());
             MeterDataSet meterDataSet = mapToMeterDataSet(connectionGroup);
             if (event.getMeterDataQuery().getQueryType() == MeterDataQueryType.USAGE) {
-                // regroup
+                LOGGER.info("Regrouping meterdata by aggregator");
                 resultMap.put(meterDataSet, reGroupByAggregator(connectionGroup.getConnection(), meterDataDtos));
             } else {
                 resultMap.put(meterDataSet, meterDataDtos);
             }
         }
 
+        LOGGER.info("First power from resultmap: " + resultMap.entrySet().iterator().next().getValue().get(0).getConnectionMeterDataDtos().get(0).getPtuMeterDataDtos().get(0).getPower());
         return resultMap;
     }
 
