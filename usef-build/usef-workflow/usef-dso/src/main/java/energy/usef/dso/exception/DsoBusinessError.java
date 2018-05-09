@@ -22,6 +22,7 @@ import energy.usef.core.exception.BusinessError;
  * Enumeration of the DSO Business Errors.
  */
 public enum DsoBusinessError implements BusinessError {
+    FLEX_OFFER_EPIRES_TOO_LATE("FlexOffer should expire before first offered PTU"),
     FLEX_OFFER_NOT_AS_REQUESTED("FlexOffer should offer flexibility as requested"),
     NON_EXISTING_CONGESTION_POINT("The grid point has not been found."),
     INVALID_SENDER("The aggregator is not connected to this grid point."),

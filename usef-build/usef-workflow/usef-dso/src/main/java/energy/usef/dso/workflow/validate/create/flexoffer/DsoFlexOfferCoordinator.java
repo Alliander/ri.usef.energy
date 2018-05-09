@@ -32,16 +32,14 @@ import energy.usef.core.model.PtuFlexOffer;
 import energy.usef.core.service.business.CorePlanboardBusinessService;
 import energy.usef.core.service.helper.JMSHelperService;
 import energy.usef.core.service.helper.MessageMetadataBuilder;
-import energy.usef.core.service.validation.CoreBusinessError;
 import energy.usef.core.service.validation.CorePlanboardValidatorService;
-import energy.usef.core.transformer.PtuListConverter;
-import energy.usef.core.util.PtuUtil;
 import energy.usef.core.util.XMLUtil;
 import energy.usef.core.workflow.DefaultWorkflowContext;
 import energy.usef.core.workflow.WorkflowContext;
 import energy.usef.core.workflow.dto.FlexOfferDto;
 import energy.usef.core.workflow.step.WorkflowStepExecuter;
 import energy.usef.core.workflow.transformer.FlexOfferTransformer;
+import energy.usef.dso.service.business.DsoPlanboardBusinessService;
 import energy.usef.dso.service.business.DsoPlanboardValidatorService;
 import energy.usef.dso.workflow.DsoWorkflowStep;
 import energy.usef.dso.workflow.coloring.ColoringProcessEvent;
@@ -51,8 +49,6 @@ import energy.usef.dso.workflow.validate.create.flexorder.PlaceFlexOrdersStepPar
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.ejb.Asynchronous;
-import javax.ejb.Lock;
-import javax.ejb.LockType;
 import javax.ejb.Singleton;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
@@ -81,6 +77,9 @@ public class DsoFlexOfferCoordinator {
 
     @Inject
     private CorePlanboardValidatorService corePlanboardValidatorService;
+
+    @Inject
+    private DsoPlanboardBusinessService dsoPlanboardBusinessService;
 
     @Inject
     private DsoPlanboardValidatorService dsoPlanboardValidatorService;
@@ -118,6 +117,10 @@ public class DsoFlexOfferCoordinator {
             corePlanboardValidatorService.validateDomain(flexOffer.getFlexRequestOrigin());
 
             dsoPlanboardValidatorService.validateFlexOfferMatchesRequest(flexOffer);
+
+            dsoPlanboardValidatorService.validateFlexOfferExpirationDateTime(flexOffer);
+
+
 
             // The Period the offer applies to should have at least one PTU that is not already pending settlement.
             String usefIdentifier = flexOffer.getCongestionPoint();

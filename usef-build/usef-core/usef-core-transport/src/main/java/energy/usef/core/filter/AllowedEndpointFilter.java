@@ -41,7 +41,7 @@ public class AllowedEndpointFilter implements ContainerRequestFilter {
 
     private boolean isPathOnWhitelist(String path) {
         String allowedRestPaths = config.getProperties().getProperty("ALLOWED_REST_PATHS");
-        LOGGER.trace("Config ALLOWED_REST_PATHS is: " + allowedRestPaths + " request path is: " + path);
+        LOGGER.debug("Config ALLOWED_REST_PATHS is: " + allowedRestPaths + " request path is: " + path);
 
         if (!StringUtils.isEmpty(allowedRestPaths)) {
             if ("*".equals(allowedRestPaths)) {
