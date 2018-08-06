@@ -109,27 +109,31 @@ public class ParticipantDiscoveryService {
      * @throws BusinessException
      */
     public Participant discoverParticipant(Message incomingMessage, ParticipantType participantType) throws BusinessException {
-
-        MessageMetadata metadata = incomingMessage.getMessageMetadata();
-        if (metadata == null || metadata.getSenderDomain() == null) {
-            return null;
-        }
-
-        String domain = participantType == ParticipantType.SENDER ? metadata.getSenderDomain() : metadata.getRecipientDomain();
-        USEFRole participantRole = participantType == ParticipantType.SENDER ? metadata.getSenderRole() : metadata
-                .getRecipientRole();
-
-        // check if one bypasses the DNS verification
-        if (byPassDNSCheck()) {
-            LOGGER.warn("DNS verification is bypassed.");
-            if (useParticipantService()) {
-                return findParticipantInParticipantService(domain, participantRole);
-            } else {
-                return findParticipantInLocalConfiguration(domain, participantRole);
+        try {
+            MessageMetadata metadata = incomingMessage.getMessageMetadata();
+            if (metadata == null || metadata.getSenderDomain() == null) {
+                return null;
             }
-        } else {
-            LOGGER.info("DNS verification is active.");
-            return findParticipantInDns(domain, participantRole);
+
+            String domain = participantType == ParticipantType.SENDER ? metadata.getSenderDomain() : metadata.getRecipientDomain();
+            USEFRole participantRole = participantType == ParticipantType.SENDER ? metadata.getSenderRole() : metadata
+                    .getRecipientRole();
+
+            // check if one bypasses the DNS verification
+            if (byPassDNSCheck()) {
+                LOGGER.warn("DNS verification is bypassed.");
+                if (useParticipantService()) {
+                    return findParticipantInParticipantService(domain, participantRole);
+                } else {
+                    return findParticipantInLocalConfiguration(domain, participantRole);
+                }
+            } else {
+                LOGGER.info("DNS verification is active.");
+                return findParticipantInDns(domain, participantRole);
+            }
+        } catch (BusinessException e) {
+            LOGGER.error("Failed to discover participant", e);
+            throw e;
         }
     }
 
