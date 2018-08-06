@@ -184,14 +184,18 @@ public class ParticipantDiscoveryService {
         }
         LOGGER.info("Participants will be retrieved from file {}", participantDnsFileName);
         List<Participant> participants = participantListBuilder.buildParticipantList(participantDnsFileName);
+        LOGGER.info("Loaded {} participants", participants.size());
 
         checkParticipantsListIsAvailable(participants);
+        LOGGER.info("Participant list is not empty");
 
         /*
          * for each participant role, try to find if the sender's address matches the hostname or the EA. At the end of the loops,
          * if nothing has been found, throw a PARTICIPANT_NOT_FOUND error.
          */
+        LOGGER.info("Iterating over participants for [{}:{}]", participantRole, domain);
         Participant foundParticipant = iterateOverParticipants(participants, domain, participantRole);
+        LOGGER.info("Found participant: {}", foundParticipant);
         if (foundParticipant == null) {
             // Added temporarely
             LOGGER.warn("Participant [{}:{}] has not been found in the local configuration file", participantRole,

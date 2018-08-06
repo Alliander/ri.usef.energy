@@ -123,7 +123,9 @@ public class SenderService {
                     .getMessageMetadata().getPrecedence());
 
             // create the url
+            LOGGER.info("Creating URL for [{}:{}]", dtoMessage.getMessageMetadata().getRecipientRole(), dtoMessage.getMessageMetadata().getRecipientDomain());
             String url = createUrl(dtoMessage);
+            LOGGER.info("Created URL: {}", url);
 
             SignedMessage signedMessage = createSignedMessage(xmlString, dtoMessage);
 
@@ -294,7 +296,9 @@ public class SenderService {
      */
     private String createUrl(Message message) throws BusinessException {
         try {
+            LOGGER.info("Discovering participant for [{}:{}]", message.getMessageMetadata().getRecipientRole(), message.getMessageMetadata().getRecipientDomain());
             Participant participant = participantDiscoveryService.discoverParticipant(message, ParticipantType.RECIPIENT);
+            LOGGER.info("Discovered participant: {}", participant);
 
             USEFRole targetRole = message.getMessageMetadata().getRecipientRole();
             ParticipantRole participantRole = null;
@@ -304,10 +308,13 @@ public class SenderService {
                     break;
                 }
             }
+            LOGGER.info("Target role is {}", targetRole);
 
             if (participantRole == null) {
                 throw new BusinessException(RECIPIENT_ROLE_NOT_PROVIDED);
             }
+
+            LOGGER.info("Returning URL: {}", participantRole.getUrl());
 
             return participantRole.getUrl();
         } catch (BusinessException e) {
