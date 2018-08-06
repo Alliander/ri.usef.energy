@@ -59,7 +59,7 @@ import static org.junit.Assert.fail;
 public class MessageEncryptionServiceIntegrationTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageEncryptionServiceIntegrationTest.class);
 
-    private static final String SEED = "us";
+    private static final String SEED = "us12bd34bd56ew78we90eudkeidkrofl";
 
     private static final int PUBLIC_KEY_SIZE = 32;
     private static final int PRIVATE_KEY_SIZE = 64;

@@ -114,9 +114,8 @@ public class MessageEncryptionServiceTest {
 
             byte[] cipher = messageEncryptionService.sealMessage(message);
             assertNotNull(cipher);
-            String signedContent = new String(Base64.decodeBase64(cipher), StandardCharsets.UTF_8);
 
-            assertEquals("Cipher mismatch.", SIGNED_HELLO_MESSAGE, signedContent);
+            assertEquals("Cipher mismatch.", SIGNED_HELLO_MESSAGE, new String(cipher, StandardCharsets.UTF_8));
         } catch (BusinessException e) {
             LOGGER.error("Exception caught during the test.", e);
             fail(e.getBusinessError().getError());
@@ -144,7 +143,7 @@ public class MessageEncryptionServiceTest {
             sodium.setPublicKey(decodeBase64(publicKeyB64));
 
             byte[] sealedMessage = messageEncryptionService.sealMessage(HELLO_MESSAGE);
-            assertEquals(asString(predictedSealedMessageB64), asString(sealedMessage));
+            assertEquals(asString(decodeBase64(predictedSealedMessageB64)), asString(sealedMessage));
 
             String unsealedMessage = messageEncryptionService.verifyMessage(sealedMessage, publicKeyB64);
             assertEquals(expectedUnsealedMessage, unsealedMessage);
@@ -174,10 +173,10 @@ public class MessageEncryptionServiceTest {
         String expectedUnsealedMessage = TG_MESSAGE;
         try {
             sodium.setPublicKey(TG_PUBLIC_KEY);
-            sodium.setSignedMessage(prognosisMessage);
+            sodium.setSignedMessage(decodeBase64(B64_SEALED_TG_MESSAGE));
             sodium.setUnsignedMessage(TG_MESSAGE.getBytes(UTF_8));
 
-            String unsealedMessage = messageEncryptionService.verifyMessage(B64_SEALED_TG_MESSAGE, b64PublicKey);
+            String unsealedMessage = messageEncryptionService.verifyMessage(decodeBase64(B64_SEALED_TG_MESSAGE), b64PublicKey);
             assertEquals(expectedUnsealedMessage, unsealedMessage);
         } catch (BusinessException e) {
             LOGGER.error("Exception caught during the execution of the test.", e);
@@ -210,18 +209,6 @@ public class MessageEncryptionServiceTest {
             fail("Public key is not encoded in Base64. Expected Business Exception.");
         } catch (BusinessException e) {
             assertEquals(EXPECTED_BASE64_PUBLIC_KEY, e.getBusinessError());
-            LOGGER.trace("Correctly caught the exception during the execution of the test.", e);
-        }
-    }
-
-    @Test
-    public void testUnsealingRequiresBase64InputMessage() {
-        try {
-            messageEncryptionService.verifyMessage(HELLO_MESSAGE.getBytes(StandardCharsets.UTF_8),
-                    Base64.encodeBase64String(publicKey));
-            fail("Input message for unsealing must be in base64. Excepted business exception.");
-        } catch (BusinessException e) {
-            assertEquals(EXPECTED_BASE64_SEALED_MESSAGE, e.getBusinessError());
             LOGGER.trace("Correctly caught the exception during the execution of the test.", e);
         }
     }
