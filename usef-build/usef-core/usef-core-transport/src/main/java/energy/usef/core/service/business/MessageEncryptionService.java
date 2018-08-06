@@ -65,9 +65,6 @@ public class MessageEncryptionService {
         if (sealedMessage == null) {
             return null;
         }
-        if (!Base64.isBase64(sealedMessage)) {
-            throw new BusinessException(MessageEncryptionError.EXPECTED_BASE64_SEALED_MESSAGE);
-        }
         if (b64PublicKey == null) {
             throw new NullPointerException("Base 64 Public Key is null (b64PublicKey).");
         }
@@ -76,7 +73,7 @@ public class MessageEncryptionService {
         }
         byte[] publicKey = decodeBase64(b64PublicKey);
         verifyPublicKeyLength(publicKey);
-        return verifyMessage(decodeBase64(sealedMessage), publicKey);
+        return verifyMessage(sealedMessage, publicKey);
     }
 
     private byte[] sealMessage(byte[] xmlMessage, byte[] privateKey) throws BusinessException {
@@ -92,8 +89,7 @@ public class MessageEncryptionService {
             throw new BusinessException(MessageEncryptionError.MESSAGE_SEALING_FAILED);
         }
 
-        // encode result in Base64
-        return Base64.encodeBase64(cipher);
+        return cipher;
     }
 
     private String verifyMessage(byte[] sealedMessage, byte[] publicKey) throws BusinessException {
