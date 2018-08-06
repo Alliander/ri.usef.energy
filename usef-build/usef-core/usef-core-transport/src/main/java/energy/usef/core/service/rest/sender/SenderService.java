@@ -140,6 +140,7 @@ public class SenderService {
         } catch (HttpResponseException e) {
             reportMessageNotSentError(storedMessage, dtoMessage, e.getMessage(), e.getStatusCode());
         } catch (IOException | BusinessException e) {
+            LOGGER.error("Failed to send message", e);
             reportMessageNotSentError(storedMessage, dtoMessage, e.getMessage(), null);
         }
     }
@@ -292,22 +293,27 @@ public class SenderService {
      * Build a correct url
      */
     private String createUrl(Message message) throws BusinessException {
-        Participant participant = participantDiscoveryService.discoverParticipant(message, ParticipantType.RECIPIENT);
+        try {
+            Participant participant = participantDiscoveryService.discoverParticipant(message, ParticipantType.RECIPIENT);
 
-        USEFRole targetRole = message.getMessageMetadata().getRecipientRole();
-        ParticipantRole participantRole = null;
-        for (ParticipantRole role : participant.getRoles()) {
-            if (targetRole.equals(role.getUsefRole())) {
-                participantRole = role;
-                break;
+            USEFRole targetRole = message.getMessageMetadata().getRecipientRole();
+            ParticipantRole participantRole = null;
+            for (ParticipantRole role : participant.getRoles()) {
+                if (targetRole.equals(role.getUsefRole())) {
+                    participantRole = role;
+                    break;
+                }
             }
-        }
 
-        if (participantRole == null) {
-            throw new BusinessException(RECIPIENT_ROLE_NOT_PROVIDED);
-        }
+            if (participantRole == null) {
+                throw new BusinessException(RECIPIENT_ROLE_NOT_PROVIDED);
+            }
 
-        return participantRole.getUrl();
+            return participantRole.getUrl();
+        } catch (BusinessException e) {
+            LOGGER.error("Failed to create URL", e);
+            throw e;
+        }
     }
 
     /*
