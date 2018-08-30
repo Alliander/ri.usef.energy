@@ -156,17 +156,21 @@ public class MdcMeterDataQueryCoordinator {
             context.setValue(CONNECTIONS.name(), connectionGroup.getConnection());
             context.setValue(META_DATA_QUERY_TYPE.name(), convertToMeterDataQueryTypeDto(event.getMeterDataQuery().getQueryType()));
             // invoke PBC
-            context = workflowStepExecuter.invoke(MdcWorkflowStep.MDC_METER_DATA_QUERY.name(), context);
-            WorkflowUtil.validateContext(MdcWorkflowStep.MDC_METER_DATA_QUERY.name(), context,
-                    MeterDataQueryStepParameter.OUT.values());
-            List<MeterDataDto> meterDataDtos = context.get(MeterDataQueryStepParameter.OUT.METER_DATA.name(), List.class);
-            LOGGER.info("First power from meterdataDtos: " + meterDataDtos.get(0).getConnectionMeterDataDtos().get(0).getPtuMeterDataDtos().get(0).getPower());
-            MeterDataSet meterDataSet = mapToMeterDataSet(connectionGroup);
-            if (event.getMeterDataQuery().getQueryType() == MeterDataQueryType.USAGE) {
-                LOGGER.info("Regrouping meterdata by aggregator");
-                resultMap.put(meterDataSet, reGroupByAggregator(connectionGroup.getConnection(), meterDataDtos));
-            } else {
-                resultMap.put(meterDataSet, meterDataDtos);
+            try {
+                context = workflowStepExecuter.invoke(MdcWorkflowStep.MDC_METER_DATA_QUERY.name(), context);
+                WorkflowUtil.validateContext(MdcWorkflowStep.MDC_METER_DATA_QUERY.name(), context,
+                        MeterDataQueryStepParameter.OUT.values());
+                List<MeterDataDto> meterDataDtos = context.get(MeterDataQueryStepParameter.OUT.METER_DATA.name(), List.class);
+                LOGGER.info("First power from meterdataDtos: " + meterDataDtos.get(0).getConnectionMeterDataDtos().get(0).getPtuMeterDataDtos().get(0).getPower());
+                MeterDataSet meterDataSet = mapToMeterDataSet(connectionGroup);
+                if (event.getMeterDataQuery().getQueryType() == MeterDataQueryType.USAGE) {
+                    LOGGER.info("Regrouping meterdata by aggregator");
+                    resultMap.put(meterDataSet, reGroupByAggregator(connectionGroup.getConnection(), meterDataDtos));
+                } else {
+                    resultMap.put(meterDataSet, meterDataDtos);
+                }
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             }
         }
 
