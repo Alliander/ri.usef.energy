@@ -42,7 +42,7 @@
         <prometheus-simpleclient.version>0.1.0</prometheus-simpleclient.version>
         <recurrent.version>0.3.3</recurrent.version>
         <reflections.version>0.9.11</reflections.version>
-        <resteasy.version>3.1.4.Final</resteasy.version>
+        <resteasy.version>4.5.7.Final</resteasy.version>
         <snakeyaml.version>1.19</snakeyaml.version>
         <asm.version>5.0.4</asm.version>
 
